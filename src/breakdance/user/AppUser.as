@@ -1,6 +1,7 @@
 package breakdance.user {
 
     import breakdance.BreakdanceApp;
+	import breakdance.data.achievements.Achievement;
     import breakdance.GlobalConstants;
     import breakdance.MiniGames;
     import breakdance.battle.data.BattleDanceMoveData;
@@ -32,18 +33,24 @@ package breakdance.user {
     import breakdance.ui.popups.PopUpManager;
     import breakdance.ui.popups.dailyAwardPopUp.DailyAwardPopUp;
     import breakdance.ui.popups.newLevelPopUp.NewLevelPopUp;
+	import breakdance.ui.popups.TakeAchievementPopUp;
     import breakdance.user.events.ChangeUserEvent;
     import breakdance.user.events.GetCollectionItemEvent;
     import breakdance.user.events.WinsInRowEvent;
+	import breakdance.ui.popups.achievementPopUp.AchievementData;
+	import breakdance.data.achievements.NameAchievements;
+	import flash.events.Event;
 
+	import breakdance.data.achievements.AchievementCollection;
     import com.hogargames.debug.Tracer;
     import com.hogargames.utils.StringUtilities;
 
     import flash.events.EventDispatcher;
+	import com.hogargames.app.popups.events.PopUpEvent;
+	
+    public class AppUser extends EventDispatcher implements InterfaceUser {
 
-    public class AppUser extends EventDispatcher {
-
-        private var _currentFriendData:FriendData;
+        private var _currentFriendData:FriendData;                             // текущий друг, т.е. null - это я, нет - это друг
 
         private var textsManager:TextsManager = TextsManager.instance;
 
@@ -74,9 +81,11 @@ package breakdance.user {
         private var _lastBet:int;
         private var _lastTurns:int;
         private var _guessMoveGameRecord:int;
+		private var _battles: int;
 
         private var _character:Character;
-
+		private var _countAchievementsDone: int;
+		
         private var _userDanceMoves:Vector.<UserDanceMove>;
         private var _userNoAppFriendsUids:Vector.<String> = new Vector.<String> ();
         private var _userAppFriends:Vector.<FriendData> = new Vector.<FriendData> ();
@@ -86,13 +95,16 @@ package breakdance.user {
         private var _newItems:Vector.<String> = new Vector.<String>;//Новые вещи для отображения в магазине.
         private var _readNews:Vector.<String> = new Vector.<String>;//Прочитанные новости.
         private var _userMissions:Vector.<String> = new Vector.<String>;//Список выполненых миссий для окна "5 шагов".
-        private var _userAwards:Vector.<String> = new Vector.<String>;//Список полученных игроком одноразовых наград.
+        private var _userAwards:Vector.<String> = new Vector.<String>;//Список полученных игроком одноразовых наград.		
         private var _userCollections:Vector.<UserCollectionData> = new Vector.<UserCollectionData>;//Список полученных игроком элементов коллекций.
-
+		private var _userAchievements:Vector.<AchievementData> = new Vector.<AchievementData>;//Список полученных игроком одноразовых наград.
+		private var _userAchievementsPhase:Object = new Object;//Список текущих phase  (по id ачивки),  чтобы сравнивать с последущими		
+		private var listTakeAchievementPopUp:Array = new Array();
+		
         private var _energyUpdateDate:Date;
         private var _staminaUpdateDate:Date;
-        private var awardDay:int;
-
+        private var awardDay:int;		
+		
         private var _winsInRow:int;//Кол-во побед подряд.
 
         private var serverTime:ServerTime;
@@ -117,7 +129,9 @@ package breakdance.user {
             _coins = 0;
             _chips = 0;
             _nickname = "";
-
+			_battles = 0;
+			_countAchievementsDone = 0;
+			
             _character = new Character ();
 
             serverTime = ServerTime.instance;
@@ -174,7 +188,11 @@ package breakdance.user {
         public function get energy ():int {
             return _energy;
         }
-
+		
+		public function get battles ():int {
+            return _battles;
+        }
+		
         public function get energyMax ():int {
             return _energyMax;
         }
@@ -335,6 +353,12 @@ package breakdance.user {
 
         public function get userAwards ():Vector.<String> {
             return _userAwards;
+        }
+		
+		
+        public function get userAchievements ():Vector.<AchievementData> {
+			trace('_userAchievements  '+_userAchievements)
+            return _userAchievements;
         }
 
         public function get userCollections ():Vector.<UserCollectionData> {
@@ -656,6 +680,8 @@ package breakdance.user {
          * @param saveSettings Сохранить текущие настройки звука и музыки, вместо того, чтобы инициализировать принятые.
          */
         public function init (response:Object, saveSettings:Boolean = false):void {
+			
+			trace('!!!!!!!!!!!!!!!!!  AppUser init')
             var i:int;
             if (!saveSettings) {
                 var userSettings:Object = response.data.user_settings;
@@ -764,7 +790,13 @@ package breakdance.user {
             }
 
             parseMissionsList (data);
-            parseAwardsList (data);
+            parseAwardsList (data);	
+			
+			if (_userAchievements.length == 0) initAchievementsList(data);
+			else  parseAchievementsList (data);
+			//{"data":{"140678096":{"user":{"id":"140678096","face_id":"4",..,"draws":"0"},"user_scores_list":[{"user_id":"140678096",..,"scores":"3"}],"user_item_list":[{"user_id":"140678096","item_id":"cap_gray","modify_date":"2013-11-06 17:17:08","create_date":"2013-11-06 17:17:08","id":"2914","color":"no_color"},{"user_id":"140678096","item_id":"elbow_l","modify_date":"2013-11-06 17:17:08","create_date":"2013-11-06 17:17:08","id":"2915","color":"no_color"},{"user_id":"140678096","item_id":"gold_helmet","modify_date":"2013-11-06 19:10:51","create_date":"2013-11-06 19:10:51","id":"2949","color":"no_color"},{"user_id":"140678096","item_id":"gumshoes_red","modify_date":"2013-11-06 17:17:08","create_date":"2013-11-06 17:17:08","id":"2917","color":"no_color"},{"user_id":"140678096","item_id":"headphones","modify_date":"2013-11-06 19:11:00","create_date":"2013-11-06 19:11:00","id":"2950","color":"no_color"},{"user_id":"140678096","item_id":"linoleum_chess","modify_date":"2013-11-06 17:17:09","create_date":"2013-11-06 17:17:09","id":"2919","color":"no_color"},{"user_id":"140678096","item_id":"singlet_gray","modify_date":"2013-11-22 15:00:09","create_date":"2013-11-22 15:00:09","id":"4403","color":"no_color"},{"user_id":"140678096","item_id":"singlet_red","modify_date":"2013-11-06 17:17:08","create_date":"2013-11-06 17:17:08","id":"2913","color":"no_color"},{"user_id":"140678096","item_id":"small_checked_shirt_red","modify_date":"2013-11-06 19:11:15","create_date":"2013-11-06 19:11:15","id":"2951","color":"no_color"},{"user_id":"140678096","item_id":"trousers_basic","modify_date":"2013-11-06 17:17:08","create_date":"2013-11-06 17:17:08","id":"2916","color":"no_color"},{"user_id":"140678096","item_id":"t_shirt_b222","modify_date":"2014-04-27 22:47:09","create_date":"2014-04-27 22:47:09","id":"567513","color":"green"},{"user_id":"140678096","item_id":"t_shirt_no_image","modify_date":"2014-04-27 22:45:08","create_date":"2014-04-27 22:45:08","id":"567512","color":"lightblue"},{"user_id":"140678096","item_id":"vesna_212_C4","modify_date":"2013-11-06 17:17:09","create_date":"2013-11-06 17:17:09","id":"2918","color":"no_color"}],"user_slot_list":[]}},"error":""}
+
+		//	parseAchievementsList ({"data": { "user_acievement_list" :[{"user_id":"5781649","achievement_id":"start_training", "phase": "3", "count":"50"}, {user_id:"5781649",achievement_id:"collector", phase: "1", count:"5"}, {user_id:"5781649",achievement_id:"brother_acrobat", phase: "0", count:"0"}]}})
             parseCollectionsList (data);
 
             dispatchEvent (new ChangeUserEvent ());
@@ -875,7 +907,21 @@ package breakdance.user {
             }
             dispatchEvent (new ChangeUserEvent ());
         }
-
+		
+		public function onGiveAchievement (response:Object):void {
+			Tracer.log('onGiveAchievement     response.data   '+response.data)
+            parseAchievementsList (response.data);
+            if (response.data) {
+                if (response.data.hasOwnProperty ("user")) {
+					trace('!!!!!    onGiveAchievement             ' + response.data.user)
+					Tracer.log('onGiveAchievement     response.data.user   '+response.data.user)
+                    parseAchievementsList(response.data.user);
+					// если пришла награда - выдача окна награды
+                }
+            }
+            dispatchEvent (new ChangeUserEvent ());
+        }
+		
         public function onSellItem (response:Object, sellingItemId:int):void {
             parseUserData (response.data);
             var numPurchasedItems:int = purchasedItems.length;
@@ -892,11 +938,16 @@ package breakdance.user {
         public function onBattleWin (response:Object):void {
             var numWinsInRow:int = parseInt (StaticData.instance.getSetting ("num_wins_in_row"));
             var previousWinsInRow:int = _winsInRow;
+			var oldChip : int = chips;
             if (response.data) {
                 if (response.data.hasOwnProperty ("user")) {
                     parseUserData (response.data.user, false);
                 }
             }
+			if ( oldChip < chips) {
+				//+1 в достижении в коллекцию
+				ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_COLLECTOR}, onGiveAchievement);	
+			}
 
             parseCollectionsList (response.data);
 
@@ -919,11 +970,17 @@ package breakdance.user {
         }
 
         public function onBattleDraw (response:Object):void {
+			
+			var oldChip : int = chips;
             if (response.data) {
                 if (response.data.hasOwnProperty ("user")) {
                     parseUserData (response.data.user, false);
                 }
             }
+			if ( oldChip < chips) {
+				//+1 в достижении в коллекцию
+				ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_COLLECTOR}, onGiveAchievement);	
+			}
 
             parseCollectionsList (response.data);
 
@@ -1041,6 +1098,9 @@ package breakdance.user {
             if (userData.hasOwnProperty ("wins")) {
                 _wins = userData.wins;
             }
+			if (userData.hasOwnProperty ("battles")) {
+                _battles = userData.battles;
+            }			
             if (userData.hasOwnProperty ("draws")) {
                 _draws = userData.draws;
             }
@@ -1057,6 +1117,11 @@ package breakdance.user {
             if (userData.hasOwnProperty ("award_day")) {
                 awardDay = userData.award_day;
             }
+			/*
+			if (userData.hasOwnProperty ("achievement")) {
+                achievement = userData.achievement;
+            }
+			*/
             if (userData.hasOwnProperty ("award_date")) {
                 var awardDateString:String = userData.award_date;
                 var awardDate:Date = serverTime.parseDateStr (awardDateString);
@@ -1170,6 +1235,10 @@ package breakdance.user {
                 }
             }
         }
+		
+		public function get countAchievementsDone ():int {
+            return _countAchievementsDone;
+        }
 
         private function parseAwardsList (data:Object):void {
             if (data) {
@@ -1185,7 +1254,130 @@ package breakdance.user {
                 }
             }
         }
+		
+		// {"user_id":"5781649","achievement_id":"start_training", "phase": "3", count:"50"}
+		// count -? берём с других переменных в этом запросе
+		
+		// инициализируем пустой список ачивок 
+		private function initAchievementsList (data:Object):void {
+			var listIdAchievement:Vector.<String> = AchievementCollection.instance.listId;   // список id ачивок
+            _userAchievements = new Vector.<AchievementData> ();
+			for (var i:int = 0; i < listIdAchievement.length; i++) {							
+				var achievementData : AchievementData = new AchievementData(listIdAchievement[i]);  // созданияе поля для данной ачивке
+				_userAchievements.push (achievementData);				
+				_userAchievementsPhase[achievementData.id] = 0;
+			}     		      
+								
+			parseAchievementsList(data,true);
+			
+			// если не совпадают данные, приходящие в user с данными по данной  ачивке - обновить её
+			for (i = 0; i < _userAchievements.length; i++) {							
+				switch(_userAchievements[i].id) {
+					case NameAchievements.ACH_START_TRAINING : //кол-во дней, когда были заходы в игру
+						// если прошло времени между 24часов и 48 между модифицированием и сегоднешней датой -  то прибавляем день, если больше 48 - обнуляем, если меньше								
+						var localModDate: Date = new Date(_userAchievements[i].modifyDate.time + ServerTime.instance.delta);
+						var localModDate24: Date = new Date(_userAchievements[i].modifyDate.time + 24 * 3600 *1000 + ServerTime.instance.delta);								
+								
+						Tracer.log(' AppUser : initAchievementsList   : fitIntoNextDay  ' + _userAchievements[i].fitIntoNextDay+'  localModDate  '+localModDate.date+'    localModDate24 '+localModDate24.date+'   server  ' + ServerTime.instance.date)
+								
+						var setNull:Boolean = false;
+						var setAdd:Boolean = false;
+								
+						if (_userAchievements[i].fitIntoNextDay == -1 || _userAchievements[i].fitIntoNextDay > 48) {									
+							// если юзер ни разу не заходил или прошло больше 48 часов - обнуляем
+							setNull = true;									
+						}
+						else if (_userAchievements[i].fitIntoNextDay < 48 && ServerTime.instance.date == localModDate24.date) {										
+							// если юзер зашёл в игру меньше пройденных 48 часов и на следующий день по числу локального времени  6,7  ...
+							setAdd = true;									
+						}
+						if (localModDate24.date<ServerTime.instance.date) {
+							//  если чило следующего дня  локального времени меньше  16 - 17    18
+							setNull = true;	
+						}	
+						if (setNull == true) {
+							ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_VALUE, { achievement_id:NameAchievements.ACH_START_TRAINING, value:1 }, onGiveAchievement); 									
+						}
+						else 
+						   if (setAdd == true) {
+							   ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_START_TRAINING }, onGiveAchievement);	
+						    }   															   
+//							parseAchievementsList({ "user_achievement_list":[{"user_id":"5781649","achievement_id":"start_training","modify_date":"2014-06-03 21:34:57","create_date":"2014-05-27 22:32:07","phase":"1","points":"5"}]});
+						break;
+					case NameAchievements.ACH_WINNER: //кол-во побед на батлах
+						trace('winner   '+_userAchievements[i].currentCountAch+' != '+_wins)
+						if (_userAchievements[i].currentCountAch != _wins){
+							ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_VALUE, {achievement_id:NameAchievements.ACH_WINNER, value:_wins}, onGiveAchievement);                        							
+						}	
+						break;								
+					case NameAchievements.ACH_OPPONENT : //кол-во ничьих на батлах
+						trace( 'worthy_opponent   '+_userAchievements[i].currentCountAch +'  != '+_draws)
+						if (_userAchievements[i].currentCountAch != _draws){
+							ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_VALUE, {achievement_id:NameAchievements.ACH_OPPONENT, value:_draws}, onGiveAchievement);                        							
+						}	
+						break;								
+					case NameAchievements.ACH_FIGHTER : //кол-во проведённых батлов
+						trace('fighter    ' + _userAchievements[i].currentCountAch + ' !=' + _battles);
+						if (_userAchievements[i].currentCountAch != _battles){
+							ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_VALUE, { achievement_id: NameAchievements.ACH_FIGHTER, value:_battles }, onGiveAchievement);                        							
+						}	
+						break;								
+					case  NameAchievements.ACH_ACCEPT_DEFEAT : //кол-во поражений на батлах
+						var lose: int = _battles - _draws - _wins;
+						trace('accept_defeat    '+_userAchievements[i].currentCountAch +'  != '+lose)
+						if (_userAchievements[i].currentCountAch != lose) {
+							ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_VALUE, {achievement_id:NameAchievements.ACH_ACCEPT_DEFEAT, value:lose}, onGiveAchievement);                        							
+						}
+						break;															
+				}
+			}			
+        }				
+	
+		private function parseAchievementsList (data:Object, firstTime:Boolean = false):void {
+			if (data) {
+			    if (data.hasOwnProperty ("user_achievement_list")) {
+					_countAchievementsDone = 0;
+					var userAchievementsList:Object = data.user_achievement_list; 
+                    for (var i:int = 0; i < _userAchievements.length; i++) {							
+						for (var j:int = 0; j < userAchievementsList.length; j++) {						
+							var achievementObject:Object = userAchievementsList [j];
+							if (achievementObject.hasOwnProperty ("achievement_id") && achievementObject.achievement_id == _userAchievements[i].id ) {							
+								_userAchievements[i].init(achievementObject);			// инит поля для данной ачивке user_achievement_list			
+								//если новое значение уровня превышает старое - сообщить о достижении								
+								//Сравниваем изменения на сервере самого phase
+								trace('parseAchievementsList   : '+_userAchievements[i].currentPhase + '     ' + _userAchievementsPhase[_userAchievements[i].id] + '   <    ' + _userAchievements[i].currentPhase);
+								if (firstTime == false && _userAchievements[i].currentPhase && _userAchievementsPhase[_userAchievements[i].id]< _userAchievements[i].currentPhase){								
+									listTakeAchievementPopUp.push(_userAchievements[i]); // для вызова TakeAchievementPopUp										
+								}	
+								_countAchievementsDone += _userAchievements[i].currentPhase;								
+								_userAchievementsPhase[_userAchievements[i].id] = _userAchievements[i].currentPhase;								
+							}													
+						}
+					}						
+					_countAchievementsDone = Math.round (_countAchievementsDone / GlobalConstants.MAXIMUM_ACHIEVEMENTS *100);
+					onNextAchievement();			
+                }
+            }		
+        }		
 
+		private function onNextAchievement(ev:Event = null):void {
+			if (listTakeAchievementPopUp.length > 0) {				
+				var takeAchievementPopUp:TakeAchievementPopUp = PopUpManager.instance.takeAchievementPopUp;
+				takeAchievementPopUp.setAchievements (listTakeAchievementPopUp.pop());
+				takeAchievementPopUp.show ();
+				takeAchievementPopUp.addEventListener( PopUpEvent.CLOSE, onNextAchievement);
+				//обновить панель				
+				dispatchEvent ( new ChangeUserEvent(ChangeUserEvent.CHANGE_USER));
+			}
+		}
+		
+        private function onGiveWins (response:Object):void {
+            //TransactionOverlay.instance.hide ();
+            if (response.response_code == 1) {
+           // 
+            }
+        }
+		
         private function parseCollectionsList (data:Object):void {
             if (data) {
                 if (data.hasOwnProperty ("user_collections_list")) {

@@ -54,7 +54,15 @@ package breakdance.core.server {
                 return 0;
             }
         }
+	
 
+		// день (номер в месяце) чисто твоего раёна
+		public function get date ():Number {
+			
+			var localDate: Date = new Date(_startServerTime.time + delta);    // дожен совпасть с текущим        
+			return localDate.date;
+		}
+        
         /**
          * Get current server's time
          */

@@ -20,6 +20,7 @@ package breakdance {
     import breakdance.data.shop.ShopItemCollection;
     import breakdance.data.sounds.SoundsDataCollection;
     import breakdance.data.video.VideoCollection;
+	import breakdance.data.achievements.AchievementCollection;
     import breakdance.socketServer.SocketServerManager;
     import breakdance.template.TemplateDefault;
     import breakdance.ui.AppBackground;
@@ -38,6 +39,7 @@ package breakdance {
     import breakdance.user.AppUser;
     import breakdance.user.UserInfoLoader;
     import breakdance.user.UserLevelCollection;
+	import breakdance.data.playerMusic.GroupCollection;
 
     import com.hogargames.debug.Tracer;
 
@@ -138,11 +140,13 @@ package breakdance {
             _initTaskStack.addTask (new SimpleTask (UserLevelCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (ShopItemCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (AwardCollection.instance.init));
+			_initTaskStack.addTask (new SimpleTask (AchievementCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (SoundsDataCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (BucksOffersCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (ConsumableCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (CollectionTypeCollection.instance.init));
             _initTaskStack.addTask (new SimpleTask (NewDataCollection.instance.init));
+			_initTaskStack.addTask (new SimpleTask (GroupCollection.instance.init));
             _initTaskStack.addTask (new AsyncInitTask (new UserInfoLoader ()));
 
             _initTaskStack.start ();

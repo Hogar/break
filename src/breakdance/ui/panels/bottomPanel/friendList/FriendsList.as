@@ -219,10 +219,12 @@ package breakdance.ui.panels.bottomPanel.friendList {
                     for (var i:int = 0; i < userFriends.length; i++) {
                         var friendData:FriendData = userFriends [i];
                         if (friendData.uid == currentFriendData.uid) {
-                            var userObject:Object = data [currentFriendData.uid];
+                            var userObject:Object = data [currentFriendData.uid];  // присланные данные по другу
                             if (userObject) {
-                                ServerUtils.initInitialPlayer (friendData, userObject);
+                                ServerUtils.initInitialPlayer (friendData, userObject);  // обработка вида игрока
+								friendData.createAchievements(userObject);
                                 appUser.currentFriendData = currentFriendData;
+								
 //                                Tracer.log ("распарсили друга " + currentFriendData.uid);
                             }
                         }

@@ -76,6 +76,8 @@ package breakdance.template {
         public static const PVP_LOG_LIST_ITEM:String = "PVP_LOG_LIST_ITEM";
         public static const GUESS_MOVE_GAME_RESULT_POP_UP:String = "GUESS_MOVE_GAME_RESULT_POP_UP";
         public static const NEW_LEVEL_POP_UP:String = "NEW_LEVEL_POP_UP";
+		public static const TAKE_ACHIEVEMENT_POP_UP:String = "TAKE_ACHIEVEMENT_POP_UP";		
+		public static const PLAYER_MUSIC_POP_UP:String = "PLAYER_MUSIC_POP_UP";		
         public static const BUCKS_TO_COINS_POP_UP:String = "BUCKS_TO_COINS_POP_UP";
         public static const DAILY_AWARD_POP_UP:String = "DAILY_AWARD_POP_UP";
         public static const RESTORE_STAMINA_POP_UP:String = "RESTORE_STAMINA_POP_UP";
@@ -83,6 +85,8 @@ package breakdance.template {
         public static const FIVE_STEPS_POP_UP:String = "FIVE_STEPS_POP_UP";
         public static const NEWS_POP_UP:String = "NEWS_POP_UP";
         public static const NEWS_LIST_ITEM:String = "NEWS_LIST_ITEM";
+		public static const ACHIEVEMENT_LIST_POPUP:String = "ACHIEVEMENT_LIST_POPUP";
+		public static const ACHIEVEMENT_LIST_ITEM:String = "ACHIEVEMENT_LIST_ITEM";		
 
         public static const INFO_MESSAGE:String = 'INFO_MESSAGE';
         public static const TOOLTIP:String = 'TOOLTIP';

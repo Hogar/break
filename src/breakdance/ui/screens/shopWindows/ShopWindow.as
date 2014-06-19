@@ -118,6 +118,7 @@ package breakdance.ui.screens.shopWindows {
                 var items:Vector.<ShopItem>;
                 var currentDressingItemId:String;
                 appUser.character.startFitting ();
+				trace('ShopWindow : selectTab  '+tab)
                 switch (tab) {
                     case btnTabBody:
                         items = ShopItemCollection.instance.getShopItemsByCategory (ShopItemCategory.BODY);
@@ -164,6 +165,7 @@ package breakdance.ui.screens.shopWindows {
                     case btnTabCover:
                         items = ShopItemCollection.instance.getShopItemsByCategory (ShopItemCategory.COVER);
                         var cover:UserPurchasedItem = appUser.character.cover;
+						trace('cover  '+appUser.character.cover)
                         if (cover) {
                             currentDressingItemId = cover.itemId;
                         }

@@ -22,6 +22,9 @@ package breakdance.core.js {
         static public const IS_MEMBER:String = 'social.isMember';
         static public const IS_INSTALLED:String = 'social.isInstalled';
         static public const ADD_LEFT:String = 'social.addLeft';
+		static public const AUDIO_LIST:String = 'social.getAudioList'; //(offset, count)
+		static public const GET_GROUP_AUDIO:String = 'social.getGroupAudioList'; //group_id,offset, count
+		//offset - с какой песни выбираем (число) count - сколько песен group_id - числовой ид группы
 
         public function JsApi (key:SingletonKey = null) {
             // Singlton

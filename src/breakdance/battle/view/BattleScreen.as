@@ -46,6 +46,7 @@ package breakdance.battle.view {
     import breakdance.user.AppUser;
     import breakdance.user.UserLevel;
     import breakdance.user.UserLevelCollection;
+	import breakdance.data.achievements.NameAchievements;
 
     import com.greensock.TweenLite;
     import com.hogargames.utils.TextFieldUtilities;
@@ -118,7 +119,11 @@ package breakdance.battle.view {
             appUser = BreakdanceApp.instance.appUser;
             tutorialManager = TutorialManager.instance;
             super (Template.createSymbol (Template.BATTLE_SCREEN));
-            battleTime = parseInt (StaticData.instance.getSetting ("battle_time"));
+			// gray_crow  			
+			// время брать на одно движение и умножать его на (кол-во выходов* кол-во движений)
+			//battleTime = parseInt (StaticData.instance.getSetting ("battle_time_motion")); * _battle.numRounds * _battle.maxDanceMoves;			
+			// какое-то начальное время (пока что )
+			battleTime = parseInt (StaticData.instance.getSetting ("battle_time"));             
 //            CONFIG::debug {
 //                battleTime -= 70;
 //            }
@@ -360,7 +365,11 @@ package breakdance.battle.view {
                 battleDefeatPopUp.setCoins (bet);
                 TweenLite.delayedCall (SHOW_POP_UP_DELAY, openPopUp, [battleDefeatPopUp]);
                 if (_controller && _controller.type == ControllerType.LOCAL) {
-                    ServerApi.instance.query (ServerApi.BATTLE_LOSE, {bet:bet}, onBattleLose);
+                    ServerApi.instance.query (ServerApi.BATTLE_LOSE, { bet:bet }, onBattleLose);
+					// добавить ачивку 
+					ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_ACCEPT_DEFEAT }, onGiveAchievement);	
+					// добавить ачивку 
+					ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_FIGHTER}, onGiveAchievement);	
                 }
             }
         }
@@ -386,11 +395,22 @@ package breakdance.battle.view {
                 else {
                     if (opponent) {
                         TransactionOverlay.instance.show ();
-                        ServerApi.instance.query (ServerApi.BATTLE_WIN, {opponent:opponent.uid , bet:bet}, onBattleWin);
+                        ServerApi.instance.query (ServerApi.BATTLE_WIN, { opponent:opponent.uid , bet:bet }, onBattleWin);
+						// добавить ачивку 
+						ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_WINNER }, onGiveAchievement);	
+						ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_FIGHTER}, onGiveAchievement);	
                     }
                 }
             }
         }
+		
+		private function onGiveAchievement (response:Object):void {
+            TransactionOverlay.instance.hide ();
+            if (response.response_code == 1) {
+                appUser.onGiveAchievement (response);
+				// если пришла награда - выдача окна награды
+            }
+        }		
 
         private function onBattleWin (response:Object):void {
             TransactionOverlay.instance.hide ();
@@ -404,7 +424,10 @@ package breakdance.battle.view {
                 TweenLite.delayedCall (SHOW_POP_UP_DELAY, openPopUp, [PopUpManager.instance.battleTiePopUp]);
             }
             TransactionOverlay.instance.show ();
-            ServerApi.instance.query (ServerApi.BATTLE_DRAW, {}, onBattleDraw);
+            ServerApi.instance.query (ServerApi.BATTLE_DRAW, { }, onBattleDraw);
+			// добавить ачивку 
+			ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_OPPONENT }, onGiveAchievement);	
+			ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_FIGHTER}, onGiveAchievement);	
         }
 
         private function onBattleDraw (response:Object):void {
@@ -550,13 +573,20 @@ package breakdance.battle.view {
         }
 
         //Начало боя.
-        private function startBattleListener (event:BattleEvent):void {
+        private function startBattleListener (event:BattleEvent):void {			
             if (tutorialManager.currentStep != TutorialStep.BATTLE_START) {
                 SoundManager.instance.playVoice (Template.SND_VOICE_BATTLE_BEGIN);
             }
             SoundManager.instance.playSound (Template.SND_PRE_BATTLE);
+			
+			// gray_crow  время брать на одно движение и умножать его на (кол-во выходов* кол-во движений)
+			if (_battle) {
+				trace('BattleScreen :startBattleListener :  кол-во выходов '+_battle.numRounds +'   '+ _battle.maxDanceMoves)
+				battleTime = parseInt (StaticData.instance.getSetting ("battle_time_motion")) * _battle.numRounds * _battle.maxDanceMoves;
+			}	
+			
             battleTimer.reset ();
-            battleTimer.start ();
+            battleTimer.start ();			
             tfTimer.text = String (battleTime);
             userBattleResultInfo = null;
             mcArrow1.visible = false;

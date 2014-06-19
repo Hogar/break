@@ -16,7 +16,7 @@ package com.hogargames.debug {
          *
          * @see #log()
          */
-        public static var doTrace:Boolean = false;
+        public static var doTrace:Boolean = true;
         private static var outputs:Vector.<ITracerOutput> = new Vector.<ITracerOutput> ();
         private static var tracerNodeTxt:String = "";
 

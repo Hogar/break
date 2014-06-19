@@ -18,9 +18,11 @@ package breakdance.ui.commons {
     import breakdance.template.Template;
     import breakdance.tutorial.TutorialManager;
     import breakdance.tutorial.TutorialStep;
+	import breakdance.ui.popups.playerMusicPopUp.PlayerMusicPopUp;
     import breakdance.user.AppUser;
     import breakdance.user.FriendData;
     import breakdance.user.events.ChangeUserEvent;
+	import breakdance.ui.popups.PopUpManager;
 
     import com.greensock.TweenLite;
     import com.hogargames.display.GraphicStorage;
@@ -48,7 +50,7 @@ package breakdance.ui.commons {
         private var mcHands:MovieClip;
         private var mcLegs:MovieClip;
         private var mcShoes:MovieClip;
-        private var mcMusicContainer:MovieClip;
+        private var mcMusicContainer:MovieClip;      //магнитофон
         private var mcMusic:MovieClip;
         private var mcCoverContainer:MovieClip;
         private var mcCover:MovieClip;
@@ -178,7 +180,11 @@ package breakdance.ui.commons {
             mcCharacterParts.addEventListener (MouseEvent.MOUSE_DOWN, mouseDownListener);
             mcCharacterParts.addEventListener (MouseEvent.ROLL_OVER, rollOverListener);
             mcCharacterParts.addEventListener (MouseEvent.ROLL_OUT, rollOutListener);
-
+			
+			mcMusicContainer.addEventListener (MouseEvent.MOUSE_DOWN, mouseDownMusicListener);
+			mcMusicContainer.addEventListener (MouseEvent.ROLL_OVER, rollOverusicListener);
+            mcMusicContainer.addEventListener (MouseEvent.ROLL_OUT, rollOutMusicListener);
+			
             appUser.addEventListener (ChangeUserEvent.CHANGE_USER_FRIEND, changeUserFriendListener);
             appUser.character.addEventListener (Event.CHANGE, changeListener);
 
@@ -331,7 +337,26 @@ package breakdance.ui.commons {
         private function deactivateListener (event:Event):void {
             stopReposition ();
         }
+		
+		
+        private function mouseDownMusicListener (event:MouseEvent):void {
+            var playerMusicPopUp:PlayerMusicPopUp = PopUpManager.instance.playerMusicPopUp;
+			playerMusicPopUp.show()
+            //if (playerMusicPopUp.isShowed) {
+              //  playerMusicPopUp.hide ();
+            //}
+        }
 
+        private function rollOverusicListener (event:MouseEvent):void {
+            var message:String = textsManager.getText ("hitPlayerMusic");
+            BreakdanceApp.instance.showTooltipMessage (message);
+        }
+
+        private function rollOutMusicListener (event:MouseEvent):void {
+            BreakdanceApp.instance.hideTooltip ();
+        }
+
+		
         private function mouseDownListener (event:MouseEvent):void {
             startMovingY = event.stageY;
             startMovingScale = mcCharacterContainer2.scaleX;

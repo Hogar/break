@@ -116,14 +116,20 @@ package breakdance.template {
             Template.addSymbol (Template.PVP_LOG_POP_UP, templateLoader.getClass ("mcPvpLogPopUp"));
             Template.addSymbol (Template.PVP_LOG_LIST_ITEM, templateLoader.getClass ("mcPvpLogListItem"));
             Template.addSymbol (Template.GUESS_MOVE_GAME_RESULT_POP_UP, templateLoader.getClass ("mcGuessMoveGameResultPopUp"));
-            Template.addSymbol (Template.NEW_LEVEL_POP_UP, templateLoader.getClass ("mcNewLevelPopUp"));
-            Template.addSymbol (Template.BUCKS_TO_COINS_POP_UP, templateLoader.getClass ("mcBucksToCoinsPopUp"));
+            Template.addSymbol (Template.NEW_LEVEL_POP_UP, templateLoader.getClass ("mcNewLevelPopUp"));								// новый уровень
+			Template.addSymbol (Template.TAKE_ACHIEVEMENT_POP_UP, templateLoader.getClass ("mcMessageTakeAchievementPopUp"));					// новое достижение			
+    		Template.addSymbol (Template.PLAYER_MUSIC_POP_UP, templateLoader.getClass ("mcPlayerMusicPopUp"));			
+			Template.addSymbol (Template.BUCKS_TO_COINS_POP_UP, templateLoader.getClass ("mcBucksToCoinsPopUp"));
             Template.addSymbol (Template.DAILY_AWARD_POP_UP, templateLoader.getClass ("mcDailyAwardPopUp"));
             Template.addSymbol (Template.RESTORE_STAMINA_POP_UP, templateLoader.getClass ("mcRestoreStaminaPopUp"));
             Template.addSymbol (Template.BEAT_STREET_SHOP_POP_UP, templateLoader.getClass ("mcBeatStreetShopPopUp"));
             Template.addSymbol (Template.FIVE_STEPS_POP_UP, templateLoader.getClass ("mc5stepsPopUp"));
             Template.addSymbol (Template.NEWS_POP_UP, templateLoader.getClass ("mcNewsPopUp"));
             Template.addSymbol (Template.NEWS_LIST_ITEM, templateLoader.getClass ("mcNewsListItem"));
+			Template.addSymbol (Template.ACHIEVEMENT_LIST_POPUP, templateLoader.getClass ("mcAchievementListPopUp"));
+            Template.addSymbol (Template.ACHIEVEMENT_LIST_ITEM, templateLoader.getClass ("mcAchievementListItem"));
+			
+			
 
             Template.addSymbol (Template.TOOLTIP, templateLoader.getClass ("mcTooltip"));
             Template.addSymbol (Template.INFO_MESSAGE, templateLoader.getClass ("mcInfoMessage"));

@@ -31,6 +31,7 @@
     import flash.geom.Point;
     import flash.text.TextField;
     import flash.utils.Timer;
+	import breakdance.data.achievements.NameAchievements;
 
     public class GuessMoveGameScreen extends ScreenWithHide implements ITextContainer {
 
@@ -221,11 +222,21 @@
             guessMoveGameResultPopUp.setResult (trueAnswers, currentQuestion - trueAnswers);
             guessMoveGameResultPopUp.show ();
             TransactionOverlay.instance.show ();
-            ServerApi.instance.query (ServerApi.SAVE_USER_SCORES, {game_id: MiniGames.GUESS_MOVE_GAME, scores: trueAnswers}, onResponse);
+            ServerApi.instance.query (ServerApi.SAVE_USER_SCORES, { game_id: MiniGames.GUESS_MOVE_GAME, scores: trueAnswers }, onResponse);
+			// конец миниигры - ставим ачивку на игру в Минидвижении
+			ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_EXPERT}, onGiveAchievement);	
             stopGame ();
         }
-
-        private function onResponse (response:Object):void {
+		
+		private function onGiveAchievement (response:Object):void {
+            //TransactionOverlay.instance.hide ();			
+            if (response.response_code == 1) {
+                BreakdanceApp.instance.appUser.onGiveAchievement (response);
+				// если пришла награда - выдача окна награды
+            }
+        }
+		
+		private function onResponse (response:Object):void {
             TransactionOverlay.instance.hide ();
         }
 

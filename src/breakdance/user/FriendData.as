@@ -12,11 +12,14 @@ package breakdance.user {
     import breakdance.battle.data.BattleDanceMoveData;
     import breakdance.battle.data.BattlePlayerData;
     import breakdance.battle.data.PlayerItemData;
-
+	import breakdance.ui.popups.achievementPopUp.AchievementData;
+	import breakdance.data.achievements.AchievementCollection;
+	import breakdance.GlobalConstants;
+	
     import flash.events.Event;
     import flash.events.EventDispatcher;
 
-    public class FriendData extends EventDispatcher implements IPlayerData, IInitialPlayerData {
+    public class FriendData extends EventDispatcher implements IPlayerData, IInitialPlayerData,InterfaceUser {
 
         private var _uid:String;
         private var _shortName:String;
@@ -38,7 +41,10 @@ package breakdance.user {
         private var _music:PlayerItemData = new PlayerItemData ();
         private var _cover:PlayerItemData = new PlayerItemData ();
         private var _other:PlayerItemData = new PlayerItemData ();
-
+		
+		private var _userAchievements:Vector.<AchievementData> = new Vector.<AchievementData>;//Список полученных игроком одноразовых наград.		
+		private var _countAchievementsDone: int;
+		
         public function FriendData () {
 
         }
@@ -193,8 +199,16 @@ package breakdance.user {
         public function set guessMoveGameRecord (value:int):void {
             _guessMoveGameRecord = value;
         }
+		
+        public function get userAchievements ():Vector.<AchievementData> {
+            return _userAchievements;
+        }
+				
+        public function get countAchievementsDone ():int {
+            return _countAchievementsDone;
+        }
 
-        /**
+		/**
          * Представление данных об игроке в бою.
          * Вмажно! Метод импользуется для отображения персонажа в окне вызова, но не даёт подные данные о текущем состоянии друга (нет stamina, chips и т.д.).
          * @return Данные об игроке в бою.
@@ -295,6 +309,46 @@ package breakdance.user {
             str += "]";
             return str;
         }
+		
+		
+		public function createAchievements(data:Object):void {
+			if (_userAchievements.length == 0) initAchievementsList();
+			parseAchievementsList (data);
+		}
+		
+			// инициализируем пустой список ачивок 
+		private function initAchievementsList ():void {
+			var listIdAchievement:Vector.<String> = AchievementCollection.instance.listId;   // список id ачивок
+            _userAchievements = new Vector.<AchievementData> ();
+			for (var i:int = 0; i < listIdAchievement.length; i++) {							
+				var achievementData : AchievementData = new AchievementData(listIdAchievement[i]);  // созданияе поля для данной ачивке
+				_userAchievements.push (achievementData);				
+			}        			
+        }				
+	
+		private function parseAchievementsList (data:Object):void {
+			
+            if (data) {
+		        if (data.hasOwnProperty ("user_achievement_list")) {
+					_countAchievementsDone = 0;
+					var userAchievementsList:Object = data.user_achievement_list; 
+                    for (var i:int = 0; i < _userAchievements.length; i++) {							
+						for (var j:int = 0; j < userAchievementsList.length; j++) {						
+							var achievementObject:Object = userAchievementsList [j];
+							if (achievementObject.hasOwnProperty ("achievement_id") && achievementObject.achievement_id == _userAchievements[i].id ) {							
+								_userAchievements[i].init(achievementObject);			// инит поля для данной ачивке user_achievement_list			
+								_countAchievementsDone += _userAchievements[i].currentPhase;					
+//								_userAchievementsPhase[_userAchievements[i].id] = _userAchievements[i].currentPhase;
+								trace('FriendData : parseAchievementsList   :   ' + achievementObject.achievement_id);
+							}													
+						}
+					}						
+					_countAchievementsDone = Math.round (_countAchievementsDone / GlobalConstants.MAXIMUM_ACHIEVEMENTS *100);					
+                }
+            }		
+			
+        }		
+
 
     }
 }

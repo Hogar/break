@@ -243,7 +243,7 @@ package breakdance.ui.popups {
                 case btnFriends:
                     JsApi.instance.query (JsApi.INVITE_FRIENDS, onInviteFriend);
                     break;
-                case  btnGetReward:
+                case  btnGetReward:   // получение награды
                     TransactionOverlay.instance.show ();
                     ServerApi.instance.query (ServerApi.GIVE_AWARD, {award_id:fiveStepsAward.id}, onGiveAward);
                     break;
@@ -295,6 +295,12 @@ package breakdance.ui.popups {
             hide ();
         }
 
+		private function onGiveAchievement (response:Object):void {
+            TransactionOverlay.instance.hide ();
+            BreakdanceApp.instance.appUser.onGiveAchievement (response);
+            hide ();
+        }
+		
         private function changeUserListener (event:ChangeUserEvent):void {
             testButtons ();
         }

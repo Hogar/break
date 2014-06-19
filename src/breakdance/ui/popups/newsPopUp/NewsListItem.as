@@ -120,7 +120,8 @@ package breakdance.ui.popups.newsPopUp {
             _loaderInfo.removeEventListener (Event.COMPLETE, completeListener);
             _loaderInfo.removeEventListener (IOErrorEvent.IO_ERROR, ioErrorListener);
             var bmp:Bitmap = Bitmap (_loaderInfo.content);
-            mcImageContainer.removeChildren ();
+			while(mcImageContainer.numChildren>0)
+				mcImageContainer.removeChildAt(0);
             if ((bmp.bitmapData.width != THUMB_WIDTH) || (bmp.bitmapData.height != THUMB_HEIGHT)) {
                 bmp.smoothing = true;
                 ResizeUtilities.resizeObj (bmp, THUMB_WIDTH, THUMB_HEIGHT, ResizeUtilities.MODE_SCALING);

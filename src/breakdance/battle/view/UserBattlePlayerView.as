@@ -17,6 +17,7 @@ package breakdance.battle.view {
     import breakdance.core.server.ServerApi;
     import breakdance.data.danceMoves.DanceMoveSubType;
     import breakdance.data.danceMoves.DanceMoveType;
+	import breakdance.data.achievements.NameAchievements;
 
     import flash.display.MovieClip;
     import flash.display.Sprite;
@@ -67,13 +68,24 @@ package breakdance.battle.view {
             super.changeBattlePlayerChipsListener (event);
             var chips:int = event.currentChips - event.previousChips;
             if (chips < 0) {
-                ServerApi.instance.query (ServerApi.TAKE_CHIPS, {}, onTakeChips);
+                ServerApi.instance.query (ServerApi.TAKE_CHIPS, { }, onTakeChips);				
             }
         }
 
         private function onTakeChips (response:Object):void {
             BreakdanceApp.instance.appUser.onResponseWithUpdateUserData (response);
-        }
+			 if (response.response_code == 1) {
+				ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, { achievement_id:NameAchievements.ACH_TWIST }, onGiveAchievement);   
+				//ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_VALUE, { achievement_id:NameAchievements.ACH_TWIST, value:chip }, onGiveAchievement);   
+			 }	
+        }		
+				
+		private function onGiveAchievement (response:Object):void {
+            if (response.response_code == 1) {
+                BreakdanceApp.instance.appUser.onGiveAchievement (response);
+				// если пришла награда - выдача окна награды
+            }
+        }		
 
         override protected function changeBattlePlayerStaminaListener (event:ChangeBattlePlayerStaminaEvent):void {
             super.changeBattlePlayerStaminaListener (event);

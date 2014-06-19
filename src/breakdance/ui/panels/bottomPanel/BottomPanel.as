@@ -322,10 +322,10 @@ package breakdance.ui.panels.bottomPanel {
                     screenId = ScreenManager.RATING_SCREEN;
                     break;
                 case btnAchievements:
-                    var randomValue:int = Math.random () * 140;
-                    btnAchievements.setPercents (randomValue);
-//                    screenId = ScreenManager.ACHIEVEMENTS_SCREEN;
-                    PopUpManager.instance.infoPopUp.showMessage (textsManager.getText ("inDevelopingTitle"), textsManager.getText ("inDevelopingText"));
+                    //var randomValue:int = Math.random () * 140;
+                    btnAchievements.setPercents (BreakdanceApp.instance.appUser.countAchievementsDone);
+                    screenId = ScreenManager.ACHIEVEMENTS_SCREEN;
+                //    PopUpManager.instance.infoPopUp.showMessage (textsManager.getText ("inDevelopingTitle"), textsManager.getText ("inDevelopingText"));
                     break;
                 case btnTraining:
                     screenId = ScreenManager.TRAINING_SCREEN;
@@ -530,8 +530,7 @@ package breakdance.ui.panels.bottomPanel {
         private function changeUserListener (event:ChangeUserEvent):void {
             var newItems:Vector.<String> = BreakdanceApp.instance.appUser.newItems;
             btnShop.newItemsSelection = (newItems && newItems.length > 0);
-            var randomValue:int = Math.random () * 140;
-            btnAchievements.setPercents (randomValue);
+			btnAchievements.setPercents (BreakdanceApp.instance.appUser.countAchievementsDone);            
             if (appUser.hasUnReadNews) {
                 btnNews.showNews ();
             }

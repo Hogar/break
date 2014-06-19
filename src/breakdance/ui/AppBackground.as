@@ -204,6 +204,7 @@ package breakdance.ui {
         }
 
         private function ioErrorListener (event:IOErrorEvent):void {
+			event.text
             Tracer.log ("Ошибка заливки фото!");
             TransactionOverlay.instance.hide ();
         }

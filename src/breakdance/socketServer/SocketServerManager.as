@@ -174,9 +174,9 @@ package breakdance.socketServer {
             if (battleData && xmlSocket) {
                 var shortLog:String = "<b>Отправили вызов.</b>";
                 var fullLog:String = battleData.toString ();
-                PopUpManager.instance.pvpLogPanelPopUp.addLog (shortLog, fullLog, RequestType.SEND);
-                var message:String = '{"method": "addChallenge", "data":' + JSON.stringify (battleData.asData ()) + '}';
-//                var message:String = '{"method": "addChallenge", "data": {}}';
+                PopUpManager.instance.pvpLogPanelPopUp.addLog (shortLog, fullLog, RequestType.SEND);				
+				var message:String = '{"method": "addChallenge", "data":' + JSON.stringify (battleData.asData ()) + '}';				
+              //  var message:String = '{"method": "addChallenge", "data": {}}';
                 Tracer.log ("[SocketServerManager] Отправили вызов: " + message);
                 xmlSocket.send (message);
             }

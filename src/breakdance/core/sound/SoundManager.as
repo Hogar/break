@@ -89,6 +89,22 @@
                 //
             }
         }
+		
+		  public function pauseSong (val:Boolean):void {
+			 SoundManager.instance.musicController.pause = val;
+		  }
+		  
+		  public function playSong (songUrl:String, volumeCoefficient:Number = .6):void {
+            SoundManager.instance.musicController.clear ();
+            var sound:Sound = new Sound ();            
+            try {
+                sound.load (new URLRequest (songUrl));
+                SoundManager.instance.musicController.play (sound, -1, volumeCoefficient);
+            }
+            catch (error:Error) {
+                //
+            }
+        }
 
         public function playSound (soundId:String, volumeCoefficient:Number = 1, ignoreSoundStack:Boolean = false):void {
             if ((soundId != null) && (soundId != "")) {

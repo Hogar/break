@@ -126,6 +126,7 @@ package breakdance {
             }
 
             textsManager.addTextContainer (this);
+
         }
 
         private function onError (message:String):void {
@@ -231,8 +232,10 @@ package breakdance {
         }
 
         private function keyDownListener (event:KeyboardEvent):void {
-            if (event.ctrlKey && (event.keyCode == TF_OUTPUT_KEY_CODE)) {
-                if (tfOutput) {
+			trace('event.keyCode  '+event.keyCode)
+         ///   if (event.ctrlKey && (event.keyCode == TF_OUTPUT_KEY_CODE)) {
+		    if (event.keyCode == 87) {
+			    if (tfOutput) {
                     tfOutput.visible = !tfOutput.visible;
                 }
             }

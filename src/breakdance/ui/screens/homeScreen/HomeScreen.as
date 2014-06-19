@@ -16,6 +16,7 @@ package breakdance.ui.screens.homeScreen {
     import breakdance.socketServer.SocketServerManager;
     import breakdance.template.Template;
     import breakdance.ui.commons.buttons.Button;
+	import breakdance.ui.popups.achievementPopUp.AchievementListPopUp;
     import breakdance.ui.popups.PopUpManager;
     import breakdance.ui.popups.battleListPopUp.BattleListPopUp;
     import breakdance.ui.popups.topPlayersListPopUp.TopPlayersPopUp;
@@ -25,6 +26,7 @@ package breakdance.ui.screens.homeScreen {
     import breakdance.ui.screens.guessMoveGameScreen.GuessMoveGameScreen;
     import breakdance.ui.screens.shopWindows.DressRoomWindow;
     import breakdance.ui.screens.shopWindows.ShopWindow;
+	import breakdance.data.achievements.NameAchievements;
     import breakdance.user.AppUser;
     import breakdance.user.FriendData;
     import breakdance.user.UserCollectionData;
@@ -50,7 +52,7 @@ package breakdance.ui.screens.homeScreen {
         private var dressRoomWindow:DressRoomWindow;
         private var danceMoviesWindow:DanceMovesWindow;
         private var guessMoveGameScreen:GuessMoveGameScreen;
-
+	
         private var mcPlayerPanel:Sprite;
         private var mcFriendPanel:Sprite;
 
@@ -139,6 +141,7 @@ package breakdance.ui.screens.homeScreen {
             }
 
             PopUpManager.instance.topPlayersPopUp.removeEventListener (ScreenEvent.HIDE_SCREEN, hideScreenListener);
+			PopUpManager.instance.achievementPopUp.removeEventListener (ScreenEvent.HIDE_SCREEN, hideScreenListener);			
             PopUpManager.instance.battleListPopUp.removeEventListener (ScreenEvent.HIDE_SCREEN, hideScreenListener);
             ScreenManager.instance.removeEventListener (ScreenManagerEvent.NAVIGATE_TO, navigateToListener);
             appUser.removeEventListener (ChangeUserEvent.CHANGE_USER_FRIEND, changeUserFriendListener);
@@ -212,6 +215,7 @@ package breakdance.ui.screens.homeScreen {
             guessMoveGameScreen.addEventListener(ScreenEvent.HIDE_SCREEN, hideScreenListener);
 
             PopUpManager.instance.topPlayersPopUp.addEventListener (ScreenEvent.HIDE_SCREEN, hideScreenListener);
+			PopUpManager.instance.achievementPopUp.addEventListener (ScreenEvent.HIDE_SCREEN, hideScreenListener);			
             PopUpManager.instance.battleListPopUp.addEventListener (ScreenEvent.HIDE_SCREEN, hideScreenListener);
             ScreenManager.instance.addEventListener (ScreenManagerEvent.NAVIGATE_TO, navigateToListener);
             appUser.addEventListener (ChangeUserEvent.CHANGE_USER_FRIEND, changeUserFriendListener);
@@ -248,8 +252,11 @@ package breakdance.ui.screens.homeScreen {
 /////////////////////////////////////////////
 
         private function changeUserFriendListener (event:ChangeUserEvent):void {
-            var randomValue:int = Math.random () * 100;
-            btnAchievements.setPercents (randomValue);
+			
+			if(appUser && appUser.currentFriendData)
+				btnAchievements.setPercents (appUser.currentFriendData.countAchievementsDone);
+			else
+				btnAchievements.setPercents (0);
             btn5Steps.visible = Boolean (appUser.userAwards.indexOf (fiveStepsAwardId) == -1);
 
             mcFriendPanel.visible = (appUser.currentFriendData != null);
@@ -303,6 +310,10 @@ package breakdance.ui.screens.homeScreen {
             if (topPlayersPopUp.isShowed) {
                 topPlayersPopUp.hide ();
             }
+			var achievementPopUp:AchievementListPopUp = PopUpManager.instance.achievementPopUp;
+            if (achievementPopUp.isShowed) {
+                achievementPopUp.hide ();
+            }
             switch (event.screenId) {
                 case (ScreenManager.BATTLE_LIST):
                     if (BreakdanceApp.instance.appUser.testReadyToBattle ()) {
@@ -310,6 +321,11 @@ package breakdance.ui.screens.homeScreen {
                         showScreen (null);
                     }
                     break;
+				case (ScreenManager.ACHIEVEMENTS_SCREEN):	
+					achievementPopUp.setData (appUser);						
+					achievementPopUp.show ();
+					showScreen (null); 
+					break;		
                 case (ScreenManager.BATTLE_SCREEN):
                 case (ScreenManager.HOME_SCREEN):
                     showScreen (null);
@@ -329,7 +345,7 @@ package breakdance.ui.screens.homeScreen {
                     break;
                 case (ScreenManager.TRAINING_SCREEN):
                     showScreen (guessMoveGameScreen);
-                    break;
+                    break;					
                 default:
                     showScreen (null);
             }
@@ -342,13 +358,20 @@ package breakdance.ui.screens.homeScreen {
                     break;
                 case btnWaterBottle:
                     if (appUser.currentFriendData) {
-                        ServerApi.instance.query (ServerApi.GIVE_CONSUMABLES, {recipient_id:appUser.currentFriendData.uid, consumables_id:RestoreStaminaConsumable.WATER_BOTTLE}, onGiveConsumables);
+						// подарила бутылку воды
+                        ServerApi.instance.query (ServerApi.GIVE_CONSUMABLES, { recipient_id:appUser.currentFriendData.uid, consumables_id:RestoreStaminaConsumable.WATER_BOTTLE }, onGiveConsumables);
+						//инкреметнула в ачивку 
+						ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, {achievement_id:NameAchievements.ACH_GIVE_WATER}, onGiveAchievement);
                         TransactionOverlay.instance.show ();
                     }
                     break;
                 case btnTicket:
+					trace('clickListener   btnTicket ')
                     if (appUser.currentFriendData) {
-                        ServerApi.instance.query (ServerApi.GIVE_COLLECTIONS, {recipient_id:appUser.currentFriendData.uid, collections_id:SOFT_HALL}, onGiveCollections);
+						//дарю билет в мягкий зал
+                        ServerApi.instance.query (ServerApi.GIVE_COLLECTIONS, { recipient_id:appUser.currentFriendData.uid, collections_id:SOFT_HALL }, onGiveCollections);
+						//инкреметнула в ачивку 
+						ServerApi.instance.query (ServerApi.SET_ACHIEVEMENT_ADD, {achievement_id:NameAchievements.ACH_ACROBAT}, onGiveAchievement);
                         TransactionOverlay.instance.show ();
                     }
                     break;
@@ -368,9 +391,14 @@ package breakdance.ui.screens.homeScreen {
                     break;
                 case btnAchievements:
                     trace ("btnAchievements");
-                    PopUpManager.instance.infoPopUp.showMessage (textsManager.getText ("inDevelopingTitle"), textsManager.getText ("inDevelopingText"));
-                    var randomValue:int = Math.random () * 140;
-                    btnAchievements.setPercents (randomValue);
+					if (appUser.currentFriendData) {
+						var achievementPopUp:AchievementListPopUp = PopUpManager.instance.achievementPopUp;
+						//if (achievementPopUp.isShowed) {	achievementPopUp.hide ();		}			
+						achievementPopUp.setData(appUser.currentFriendData);						
+						achievementPopUp.show ();												
+						btnAchievements.setPercents (appUser.currentFriendData.countAchievementsDone);
+					}	
+					//PopUpManager.instance.infoPopUp.showMessage (textsManager.getText ("inDevelopingTitle"), textsManager.getText ("inDevelopingText"));
                     break;
                 case btnHome:
                     appUser.currentFriendData = null;
@@ -378,6 +406,14 @@ package breakdance.ui.screens.homeScreen {
             }
         }
 
+		  private function onGiveAchievement (response:Object):void {
+            TransactionOverlay.instance.hide ();
+            if (response.response_code == 1) {
+                appUser.onGiveAchievement (response);
+				// если пришла награда - выдача окна награды
+            }
+        }
+		
         private function onGiveConsumables (response:Object):void {
             TransactionOverlay.instance.hide ();
             if (response.response_code == 1) {

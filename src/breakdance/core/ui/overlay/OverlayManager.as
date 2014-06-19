@@ -15,7 +15,8 @@ package breakdance.core.ui.overlay {
         static public const SETTINGS_LAYER_PRIORITY:uint = 157;
         static public const ERROR_LAYER_PRIORITY:uint = 156;
         static public const TRANSACTION_LAYER_PRIORITY:uint = 155;
-        static public const GIFT_LAYER_PRIORITY:uint = 145;
+		static public const ACH_LAYER_PRIORITY:uint = 150;
+        static public const GIFT_LAYER_PRIORITY:uint = 145;		
         static public const TUTORIAL_LAYER_PRIORITY:uint = 145;
         static public const DIALOG_LAYER_PRIORITY:uint = 140;
         static public const DIALOG_BACK_LAYER_PRIORITY:uint = 135;

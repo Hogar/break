@@ -7,6 +7,7 @@
  */
 package breakdance.ui.popups {
 
+	import breakdance.ui.popups.achievementPopUp.AchievementListPopUp;
     import breakdance.ui.popups.basePopUps.BasePopUp;
     import breakdance.ui.popups.battleListPopUp.BattleListPopUp;
     import breakdance.ui.popups.battlePopUp.BattleDefeatPopUp;
@@ -20,6 +21,7 @@ package breakdance.ui.popups {
     import breakdance.ui.popups.infoPopUp.InfoPopUpWithCharacter2;
     import breakdance.ui.popups.newLevelPopUp.NewLevelPopUp;
     import breakdance.ui.popups.newsPopUp.NewsPopUp;
+	import breakdance.ui.popups.playerMusicPopUp.PlayerMusicPopUp;
     import breakdance.ui.popups.pvpLogPanel.PvpLogPanelPopUp;
     import breakdance.ui.popups.restoreStaminaPopUp.RestoreStaminaPopUp;
     import breakdance.ui.popups.topPlayersListPopUp.TopPlayersPopUp;
@@ -45,11 +47,13 @@ package breakdance.ui.popups {
         public var sendInvitePopUp:SendInvitePopUp;
         public var languagePopUp:LanguagePopUp;
         public var topPlayersPopUp:TopPlayersPopUp;
+		public var achievementPopUp:AchievementListPopUp;
         public var pvpLogPanelPopUp:PvpLogPanelPopUp;
         public var guessMoveGameResultPopUp:GuessMoveGameResultPopUp;
         public var leaveBattleScreenPopUp:LeaveBattleScreenPopUp;
         public var leaveMiniGameScreenPopUp:LeaveMiniGameScreenPopUp;
         public var newLevelPopUp:NewLevelPopUp;
+		public var takeAchievementPopUp:TakeAchievementPopUp;		
         public var bucksToCoinsPopUp:BucksToCoinsPopUp;
         public var notEnoughCoinsPopUp:NotEnoughCoinsPopUp;
         public var notEnoughBucksPopUp:NotEnoughBucksPopUp;
@@ -60,6 +64,7 @@ package breakdance.ui.popups {
         public var beatStreetShopPopUp:BeatStreetShopPopUp;
         public var fiveStepsPopUp:FiveStepsPopUp;
         public var newsPopUp:NewsPopUp;
+		public var playerMusicPopUp:PlayerMusicPopUp;
 
         private var allPopUps:Vector.<BasePopUp>;
 
@@ -82,11 +87,13 @@ package breakdance.ui.popups {
             sendInvitePopUp = new SendInvitePopUp ();
             languagePopUp = new LanguagePopUp ();
             topPlayersPopUp = new TopPlayersPopUp ();
+			achievementPopUp = new AchievementListPopUp ();
             pvpLogPanelPopUp = new PvpLogPanelPopUp ();
             guessMoveGameResultPopUp = new GuessMoveGameResultPopUp ();
             leaveBattleScreenPopUp = new LeaveBattleScreenPopUp ();
             leaveMiniGameScreenPopUp = new LeaveMiniGameScreenPopUp ();
             newLevelPopUp = new NewLevelPopUp ();
+			takeAchievementPopUp = new TakeAchievementPopUp();
             bucksToCoinsPopUp = new BucksToCoinsPopUp ();
             notEnoughCoinsPopUp = new NotEnoughCoinsPopUp ();
             notEnoughBucksPopUp = new NotEnoughBucksPopUp ();
@@ -95,8 +102,9 @@ package breakdance.ui.popups {
             restoreStaminaPopUp = new RestoreStaminaPopUp ();
             savePhotoPopUp = new SavePhotoPopUp ();
             beatStreetShopPopUp = new BeatStreetShopPopUp ();
-            fiveStepsPopUp = new FiveStepsPopUp ();
+            fiveStepsPopUp = new FiveStepsPopUp ();			
             newsPopUp = new NewsPopUp ();
+			playerMusicPopUp = new PlayerMusicPopUp();
 
             allPopUps = new Vector.<BasePopUp> ();
 
@@ -114,11 +122,13 @@ package breakdance.ui.popups {
             allPopUps.push (sendInvitePopUp);
             allPopUps.push (languagePopUp);
             allPopUps.push (topPlayersPopUp);
+			allPopUps.push (achievementPopUp);
 //            allPopUps.push (pvpLogPanelPopUp);
             allPopUps.push (guessMoveGameResultPopUp);
             allPopUps.push (leaveBattleScreenPopUp);
             allPopUps.push (leaveMiniGameScreenPopUp);
             allPopUps.push (newLevelPopUp);
+			allPopUps.push (takeAchievementPopUp);			
             allPopUps.push (bucksToCoinsPopUp);
             allPopUps.push (notEnoughCoinsPopUp);
             allPopUps.push (notEnoughBucksPopUp);
@@ -129,6 +139,8 @@ package breakdance.ui.popups {
             allPopUps.push (beatStreetShopPopUp);
             allPopUps.push (fiveStepsPopUp);
             allPopUps.push (newsPopUp);
+			allPopUps.push (playerMusicPopUp);
+			
         }
 
 
