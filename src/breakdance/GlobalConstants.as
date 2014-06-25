@@ -61,7 +61,7 @@ package breakdance {
 	//	public static const DEBUG_AUTH_KEY:String = "479bb0419f28a7462cc28c939100ef76"
         static public const SECRET_KEY:String = "wfp4eo34";
 
-        public static var VERSION:String = "1.2.11";
+        public static var VERSION:String = "1.2.12";
         public static var VERSION_DATE:Date = new Date (2014, 3, 21);
 
         public static var SERVER_API_URL:String = "http://bb1vs1.ru/server/index.php/";

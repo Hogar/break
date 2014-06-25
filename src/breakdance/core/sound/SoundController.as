@@ -16,6 +16,7 @@ package breakdance.core.sound {
     import flash.media.SoundChannel;
     import flash.media.SoundTransform;
     import flash.utils.Dictionary;
+	import com.hogargames.debug.Tracer;
 
     public class SoundController extends EventDispatcher {
 
@@ -128,6 +129,7 @@ package breakdance.core.sound {
         }
 
         public function play (sound:Sound, loop:int = 0, volumeCoefficient:Number = 1):void {
+			Tracer.log('---------------------------play '+enable)
             if (!enable || (sound == null)) {
                 return;
             }
@@ -139,8 +141,9 @@ package breakdance.core.sound {
 
             sounds.push (sound);
             loopsDict [sound] = loop;
-            volumeCoefficientsDict [sound] = volumeCoefficient;
-
+            volumeCoefficientsDict [sound] = volumeCoefficient;			
+			
+			pause = false;			 ////
             playSound (sound);
         }
 
@@ -175,7 +178,7 @@ package breakdance.core.sound {
             var soundChannel:SoundChannel;
             try {
                 //create new sound channel, play sound:
-                soundChannel = sound.play (position);
+                soundChannel = sound.play (position);				
             }
             catch (error:Error) {
                 soundChannel = null;

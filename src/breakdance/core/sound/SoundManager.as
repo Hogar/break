@@ -50,6 +50,9 @@
 
             musicController.addEventListener(SoundControllerEvent.MUTE, musicManagerMuteListener);
             musicController.addEventListener(SoundControllerEvent.UNMUTE, musicManagerMuteListener);
+        //    musicController.addEventListener(SoundControllerEvent.PAUSE, musicManagerPauseListener);
+        //    musicController.addEventListener(SoundControllerEvent.RESUME, musicManagerPauseListener);
+
             soundsController.addEventListener(SoundControllerEvent.ENABLE, soundManagerEnableEvent);
             soundsController.addEventListener(SoundControllerEvent.DISABLE, soundManagerEnableEvent);
 
@@ -81,17 +84,27 @@
             SoundManager.instance.musicController.clear ();
             var sound:Sound = new Sound ();
             var radioUrl:String = StaticData.instance.getSetting ("radio");
-            try {
+            try {				
                 sound.load (new URLRequest (radioUrl));
                 SoundManager.instance.musicController.play (sound, -1, volumeCoefficient);
+				dispatchEvent(new SoundManagerEvent (SoundManagerEvent.CHANGE_MUSICSONG_CONTROLLER));
             }
             catch (error:Error) {
                 //
             }
         }
 		
+		  public function get pauseMusic():Boolean {
+			 return SoundManager.instance.musicController.pause;						 
+		  }
+		  
+		  public function clearSong ():void {
+			SoundManager.instance.musicController.clear ();
+		  }
+		
 		  public function pauseSong (val:Boolean):void {
-			 SoundManager.instance.musicController.pause = val;
+			SoundManager.instance.musicController.pause = val;
+			dispatchEvent(new SoundManagerEvent (SoundManagerEvent.CHANGE_MUSICSONG_CONTROLLER));			
 		  }
 		  
 		  public function playSong (songUrl:String, volumeCoefficient:Number = .6):void {
@@ -99,7 +112,8 @@
             var sound:Sound = new Sound ();            
             try {
                 sound.load (new URLRequest (songUrl));
-                SoundManager.instance.musicController.play (sound, -1, volumeCoefficient);
+                SoundManager.instance.musicController.play (sound, -1, volumeCoefficient);				
+				dispatchEvent(new SoundManagerEvent (SoundManagerEvent.CHANGE_MUSICSONG_CONTROLLER));
             }
             catch (error:Error) {
                 //
@@ -176,6 +190,10 @@
         private function musicManagerMuteListener (event:SoundControllerEvent):void {
             dispatchEvent(new SoundManagerEvent (SoundManagerEvent.CHANGE_MUSIC_CONTROLLER));
         }
+		
+		private function musicManagerPauseListener (event:SoundControllerEvent):void {
+            dispatchEvent(new SoundManagerEvent (SoundManagerEvent.CHANGE_MUSICSONG_CONTROLLER));
+        }	
 
     }
 

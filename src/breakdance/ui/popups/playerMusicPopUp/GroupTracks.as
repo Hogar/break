@@ -3,17 +3,19 @@ package breakdance.ui.popups.playerMusicPopUp
 	
 	import breakdance.data.playerMusic.TrackData;
 	import breakdance.core.sound.SoundManager;
+	import breakdance.ui.popups.playerMusicPopUp.events.ChangePlayerDataEvent;
+	import flash.events.EventDispatcher;
 	import flash.utils.Timer;
 	import flash.events.TimerEvent;
 	import breakdance.core.js.JsApi;
 	import breakdance.core.js.JsQueryResult;
 	import com.hogargames.debug.Tracer;
-	
+	import breakdance.core.server.ServerTime;
 	/**
 	 * ...
 	 * @author gray_crow
 	 */
-	public class GroupTracks 
+	public class GroupTracks extends EventDispatcher
 	{
 		private static const COUNT_TAKE_TRACK : int = 20;
 		private static const SOUND_NONE : int = 0;
@@ -25,54 +27,68 @@ package breakdance.ui.popups.playerMusicPopUp
 		private var _listTrack		: Vector.<TrackData>;
 		private var _currentTrack	: int;
 		private var _currentName	: String;				
+		private var _currentAutor	: String;				
 		private var _maxCountTrack 	: int;
 		private var isPlay 			: Boolean; // флаг нужно ли проигрывать музыку после завершения обновления группы
 		private var _pause		 	: Boolean;
+		private var _clear		 	: Boolean;
+		private var _shuffle	 	: Boolean;
 		private var timerTrack		: Timer;
+		private var _startTimer		: Number;
+		private var _residualTime	: Number;
 		
 		public function GroupTracks(id: int, nameGroup:String) 
 		{			
+			super();
 			_idGroup = id;
 			_nameGroup = nameGroup;
 			_listTrack = new Vector.<TrackData> ();
 			timerTrack  = new Timer(1000, 1);
 			timerTrack.addEventListener(TimerEvent.TIMER_COMPLETE, onEndTimeTrack);
-			_pause = false;
+			_pause = true;
+			_clear = true;
+			_shuffle = false;
 			_currentTrack = 0;
-			_currentName = '[пусто]';
+			_currentName = '';
 			_maxCountTrack = 100000;	
 		}				
-			
-		public function showGroup():void {
+
+//////////////////////////////////
+//PUBLIC:
+//////////////////////////////////
+
+ 
+		public function showGroup(shuffle:Boolean):void {
 			_currentTrack = 0;
+			_shuffle = shuffle; 
 			timerTrack.reset();
-			_currentName = _listTrack[_currentTrack].title +' - '+_listTrack[_currentTrack].artist;
 			updateSong();
+			clearSong();
 		}	
 		
 		public function hideGroup():void {
 			timerTrack.stop();
 			_pause = true;
+			clearSong();
 			SoundManager.instance.pauseSong(_pause);		
 		}	
 		
-		// подгрузка следующей группы песен
-		public function updateSong():void {
-			Tracer.log('updateSong    '+_listTrack.length +'  == '+_currentTrack +'  <  '+_maxCountTrack)
-			if (_listTrack.length <= _currentTrack && _currentTrack < _maxCountTrack) {
-				if (_idGroup==0) JsApi.instance.query (JsApi.AUDIO_LIST, onAudioList, [_listTrack.length, COUNT_TAKE_TRACK]);							 
-				else JsApi.instance.query (JsApi.GET_GROUP_AUDIO, onAudioList, [_idGroup, _listTrack.length, COUNT_TAKE_TRACK]);							 
-			}	
+		public function get captionSong():String {
+			if ( _currentAutor==null ||_currentName== null || (_currentName == '' && _currentAutor == '' ))return '';
+			var title:String = ' '+_currentName +' - ' + _currentAutor+' ';			
+			while (title.length < 38) 
+				title = ' ' + title + ' ';
+			return title;
 		}
 		
-		public function get captionSong():String {
-			while (_currentName.length < 60) 
-				_currentName = ' ' + _currentName + ' ';
-			return _currentName;
+		public function get hitSong():String {			
+			if ( _currentAutor==null ||_currentName== null || (_currentName == '' && _currentAutor == '' )) return '';
+			var title:String = _currentName +'<br>' + _currentAutor;			
+			return title;
 		}
 		
 		public function get captionGroup():String {
-			return 'Группа ' + _nameGroup;			
+			return _nameGroup;			
 		}
 		
 		public function get nextBtnEnabled():Boolean {
@@ -89,45 +105,112 @@ package breakdance.ui.popups.playerMusicPopUp
 		
 		public function set pause(val:Boolean):void {
 			_pause = val;
-			SoundManager.instance.pauseSong(_pause);		
-			if (_pause) timerTrack.start();
-			else  timerTrack.stop();
-		}
-		
-		public function playSong():void {
-			
-			if (_currentTrack < 0) _currentTrack = 0;
-			if (_currentTrack >= _listTrack.length && _currentTrack < _maxCountTrack) {
-				isPlay = true;
-				updateSong();	
-			}
-			else {
-				playCurrentSong();
-			}		
-		}
-		
+			playSong();
+		}		
+
 		public function nextSongPlay():void {
+			if (_shuffle) _currentTrack = int(Math.random() * _listTrack.length+10);
 			_currentTrack++;	
+			_clear = true;
 			playSong();
 		}
 
 		public function previousSongPlay():void {
+			if (_shuffle) _currentTrack = int(Math.random() * _listTrack.length+10);
 			_currentTrack--;	
+			_clear = true;
 			playSong();
+		}
+		
+		public function playSong():void {
+			Tracer.log('playSong   '+_currentTrack)
+			if (_currentTrack < 0) _currentTrack = 0;
+			if (_currentTrack < _listTrack.length) {
+				showCurSongAndPlay();
+				return;
+			}	
+			if ( _currentTrack < _maxCountTrack) {
+				isPlay = true;
+				updateSong();	
+			}
+			else {
+				//проигрываем сначала
+				_currentTrack = 0;
+				showCurSongAndPlay();
+			}	
+		}
+		
+		public function clearSong():void {
+			_clear = true;
+			SoundManager.instance.clearSong();
+		}	
+		
+		public function set shuffle(val:Boolean):void {
+			//не перемешивать, а брать рандомно из того
+			_shuffle = val;
+		}
+		
+		public function destroy():void {
+			
+			if (timerTrack) {
+				timerTrack.stop();	
+				timerTrack.removeEventListener(TimerEvent.TIMER_COMPLETE, onEndTimeTrack);
+			}
+			while (_listTrack && _listTrack.length > 0) {				
+				_listTrack.shift();
+			}
+			_listTrack = null;
+		}
+
+//////////////////////////////////
+//PRIVATE:
+//////////////////////////////////
+
+		// подгрузка следующей группы песен
+		private function updateSong():void {
+			Tracer.log('updateSong    '+_listTrack.length +'  == '+_currentTrack +'  <  '+_maxCountTrack)
+			if (_listTrack.length <= _currentTrack && _currentTrack < _maxCountTrack) {
+				if (_idGroup==0) JsApi.instance.query (JsApi.AUDIO_LIST, onAudioList, [_listTrack.length, COUNT_TAKE_TRACK]);							 
+				else JsApi.instance.query (JsApi.GET_GROUP_AUDIO, onAudioList, [_idGroup, _listTrack.length, COUNT_TAKE_TRACK]);							 
+			}	
 		}
 		
 		// прокрутить текущую композицию
 		private function playCurrentSong():void {
 			Tracer.log('playCurrentSong  ' + _currentTrack + '    ' + _listTrack.length + '   ' + _pause);
-			if (_currentTrack >= _listTrack.length) return;
-				_currentName = _listTrack[_currentTrack].title +' - '+_listTrack[_currentTrack].artist;
-			if (_pause == false){
-				SoundManager.instance.playSong (_listTrack[_currentTrack].url);			
-				timerTrack.delay = _listTrack[_currentTrack].duration *1000;
-				timerTrack.reset();
-				timerTrack.start();
-				Tracer.log('timerTrack.delay   ' +timerTrack.delay );
-			}	
+			
+			//если пауза - показать текущую композицию
+			if (_pause) {				
+				SoundManager.instance.pauseSong(true);		
+				Tracer.log('Stop   timerTrack.delay   ' +timerTrack.delay +'    _residualTime = '+_residualTime+'    _startTimer = '+_startTimer);
+				_residualTime -= (ServerTime.instance.time -_startTimer);
+				_startTimer = ServerTime.instance.time;
+				timerTrack.stop();
+				Tracer.log('Stop 222  timerTrack.delay   ' +timerTrack.delay +'    _residualTime = '+_residualTime+'    _startTimer = '+_startTimer);
+			}
+			else  {
+				if (_clear) {												
+					SoundManager.instance.playSong (_listTrack[_currentTrack].url);			
+					//SoundManager.instance.pauseSong(false);					
+					timerTrack.delay = _listTrack[_currentTrack].duration *1000;
+					timerTrack.reset();
+					timerTrack.start();
+					_startTimer = ServerTime.instance.time;
+					_residualTime = _listTrack[_currentTrack].duration * 1000; 
+					dispatchEvent (new ChangePlayerDataEvent (ChangePlayerDataEvent.CHANGE_NAME_SONG));
+					Tracer.log('Restart   timerTrack.delay   ' +timerTrack.delay +'   _startTimer = '+_startTimer);
+					_clear = false;  // т.е. проигрывается текущая песня					
+					
+				}
+				else {
+					Tracer.log('Start   timerTrack.delay   ' +timerTrack.delay +'    timerTrack.currentCount = ' + timerTrack.currentCount);
+					timerTrack.delay = _residualTime;// * 1000;
+					timerTrack.reset();
+					timerTrack.start();
+					SoundManager.instance.pauseSong(false);		
+				}
+				Tracer.log('timerTrack.delay   ' +timerTrack.delay +'    timerTrack.currentCount = '+timerTrack.currentCount);
+			}			
 		}
 		
 		private function onAudioList(response:JsQueryResult):void {			
@@ -149,15 +232,22 @@ package breakdance.ui.popups.playerMusicPopUp
 						count++;
 					}	
                 }
-				if (count < COUNT_TAKE_TRACK)				
-					_maxCountTrack = _listTrack.length;
             }   
-			if (isPlay == true)		playCurrentSong();
+			if (count < COUNT_TAKE_TRACK)				
+				_maxCountTrack = _listTrack.length;
+			Tracer.log('_maxCountTrack   '+_maxCountTrack);	
+			if (isPlay == true)		showCurSongAndPlay();
         }		
 
+		private function showCurSongAndPlay():void {			
+			if (_currentTrack >= _listTrack.length) return;						
+			_currentName = _listTrack[_currentTrack].title;
+			_currentAutor = _listTrack[_currentTrack].artist;
+			Tracer.log('showCurSongAndPlay   '+_idGroup+'       _currentName   '+_currentName)			
+			playCurrentSong();
+		}
 		
 		private function onEndTimeTrack(ev:TimerEvent):void {
-			_currentTrack++;
 			nextSongPlay();
 		}
 		

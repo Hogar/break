@@ -13,6 +13,7 @@ package breakdance.core.sound.events {
 
         public static const CHANGE_SOUND_CONTROLLER:String = "change sound state";
         public static const CHANGE_MUSIC_CONTROLLER:String = "change music state";
+		public static const CHANGE_MUSICSONG_CONTROLLER:String = "change musicsong state";
 
         public function SoundManagerEvent (type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
             super (type, bubbles, cancelable);

@@ -26,6 +26,7 @@ package breakdance {
     import breakdance.ui.AppBackground;
     import breakdance.ui.commons.InfoMessage;
     import breakdance.ui.commons.tooltip.Tooltip;
+	import breakdance.ui.commons.tooltip.Tooltip2;
     import breakdance.ui.commons.tooltip.TooltipData;
     import breakdance.ui.commons.tooltip.TooltipOrientation;
     import breakdance.ui.panels.bottomPanel.BottomPanel;
@@ -73,6 +74,7 @@ package breakdance {
         public var currentScreen:Screen;
 
         private var tooltip:Tooltip;
+		private var tooltipSong:Tooltip2;
 
         private var infoMessageContainer:Sprite;
 
@@ -169,6 +171,16 @@ package breakdance {
             tooltip.hide ();
         }
 
+	    public function showTooltipMessageSong (message:String, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM, timeHide:Number = 0):void {
+			trace(tooltip+'   '+tooltipSong)
+            tooltipSong.showTextAndPosition (message, positionPoint, noAnimation, orientation, timeHide);
+			
+        }
+
+        public function hideTooltipSong ():void {
+            tooltipSong.hide ();
+        }
+		
         public function showInfoMessage (text:String, positionPoint:Point):void {
             var infoMessage:InfoMessage = new InfoMessage (text);
             infoMessage.x = positionPoint.x;
@@ -199,8 +211,11 @@ package breakdance {
             battleScreen = new BattleScreen ();
 
             tooltip = new Tooltip ();
+			tooltipSong = new Tooltip2 ();
+			
             OverlayManager.instance.addOverlay (tooltip, OverlayManager.TOOLTIP_LAYER_PRIORITY);
-
+			OverlayManager.instance.addOverlay (tooltipSong, OverlayManager.TOOLTIP_LAYER_PRIORITY_MUSICK);
+			
             infoMessageContainer = new Sprite ();
             OverlayManager.instance.addOverlay (infoMessageContainer, OverlayManager.TOOLTIP_LAYER_PRIORITY);
 
@@ -220,6 +235,7 @@ package breakdance {
             if (appUser.hasUnReadNews) {
                 PopUpManager.instance.newsPopUp.show ();
             }
+		
         }
 
         private function gotoScreen (screen:Screen):void {

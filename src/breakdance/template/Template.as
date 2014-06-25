@@ -90,6 +90,7 @@ package breakdance.template {
 
         public static const INFO_MESSAGE:String = 'INFO_MESSAGE';
         public static const TOOLTIP:String = 'TOOLTIP';
+		public static const TOOLTIP2:String = 'TOOLTIP2';
         public static const LOADING_SCREEN:String = 'LOADING_SCREEN';
         public static const TUTORIAL:String = 'TUTORIAL';
 

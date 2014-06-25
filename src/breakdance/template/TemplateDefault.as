@@ -132,6 +132,7 @@ package breakdance.template {
 			
 
             Template.addSymbol (Template.TOOLTIP, templateLoader.getClass ("mcTooltip"));
+			Template.addSymbol (Template.TOOLTIP2, templateLoader.getClass ("mcTooltip2"));
             Template.addSymbol (Template.INFO_MESSAGE, templateLoader.getClass ("mcInfoMessage"));
             Template.addSymbol (Template.LOADING_SCREEN, templateLoader.getClass ("mcLoadingScreen"));
             Template.addSymbol (Template.TUTORIAL, templateLoader.getClass ("mcTutorial"));

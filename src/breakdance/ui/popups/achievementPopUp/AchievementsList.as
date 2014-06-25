@@ -47,7 +47,7 @@ package breakdance.ui.popups.achievementPopUp
             var listIdAchievement:Vector.<String> = AchievementCollection.instance.listId;
 			  for (var i:int = 0; i < listIdAchievement.length; i++) {
                 var achievementsListItem:AchievementsListItem = new AchievementsListItem ();
-                achievementsListItem.y = i * STEP-3;
+                achievementsListItem.y = i * STEP;
         		achievementsListItem.achievementsData = achievementList[i];
                 container.addChild (achievementsListItem);
                 achievementsListItems.push (achievementsListItem);

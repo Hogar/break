@@ -23,6 +23,7 @@ package breakdance.ui.commons {
     import breakdance.user.FriendData;
     import breakdance.user.events.ChangeUserEvent;
 	import breakdance.ui.popups.PopUpManager;
+	import flash.geom.Point;
 
     import com.greensock.TweenLite;
     import com.hogargames.display.GraphicStorage;
@@ -35,7 +36,10 @@ package breakdance.ui.commons {
     import flash.events.MouseEvent;
     import flash.geom.Rectangle;
     import flash.text.TextField;
-
+	import breakdance.core.sound.SoundManager;
+	import breakdance.core.sound.events.SoundManagerEvent;
+	import com.hogargames.debug.Tracer;
+	
     public class CharacterView extends GraphicStorage {
 
         private var mcCharacterContainer:MovieClip;
@@ -82,6 +86,8 @@ package breakdance.ui.commons {
         private static const TWEEN_TIME:Number = .2;
         private static const SHOW_FRAME:String = "show";
         private static const HIDE_FRAME:String = "hide";
+		private static const PLAY_FRAME:String = "play";
+		private static const STOP_FRAME:String = "stop";
 
         public function CharacterView () {
             appUser = BreakdanceApp.instance.appUser;
@@ -95,7 +101,8 @@ package breakdance.ui.commons {
 
             graphics.beginFill (0x00ff00, 0);
             graphics.drawRect (0, 0, GlobalConstants.APP_WIDTH, GlobalConstants.APP_HEIGHT);
-            graphics.endFill ();
+            graphics.endFill ();						
+			
         }
 
 /////////////////////////////////////////////
@@ -118,7 +125,11 @@ package breakdance.ui.commons {
         public function hideScreenShootMode ():void {
             mcScreenShotInfo.visible = false;
         }
-
+		
+		public function get musicContainerCoord():Point {			
+			return new Point(mcMusicContainer.x , mcMusicContainer.y);
+		}
+		
         override public function destroy ():void {
             if (tshirt) {
                 tshirt.destroy ();
@@ -181,9 +192,15 @@ package breakdance.ui.commons {
             mcCharacterParts.addEventListener (MouseEvent.ROLL_OVER, rollOverListener);
             mcCharacterParts.addEventListener (MouseEvent.ROLL_OUT, rollOutListener);
 			
-			mcMusicContainer.addEventListener (MouseEvent.MOUSE_DOWN, mouseDownMusicListener);
-			mcMusicContainer.addEventListener (MouseEvent.ROLL_OVER, rollOverusicListener);
-            mcMusicContainer.addEventListener (MouseEvent.ROLL_OUT, rollOutMusicListener);
+			mcMusicContainer.hit.addEventListener (MouseEvent.MOUSE_DOWN, mouseDownMusicListener);
+			mcMusicContainer.hit.addEventListener (MouseEvent.ROLL_OVER, rollOverMusicListener);
+            mcMusicContainer.hit.addEventListener (MouseEvent.ROLL_OUT, rollOutMusicListener);
+            mcMusicContainer.buttonMode = true;
+            mcMusicContainer.useHandCursor = true;
+			
+			SoundManager.instance.addEventListener(SoundManagerEvent.CHANGE_MUSIC_CONTROLLER, musicManagerMuteListener);
+			SoundManager.instance.addEventListener(SoundManagerEvent.CHANGE_MUSICSONG_CONTROLLER, musicManagerMuteListener);
+			
 			
             appUser.addEventListener (ChangeUserEvent.CHANGE_USER_FRIEND, changeUserFriendListener);
             appUser.character.addEventListener (Event.CHANGE, changeListener);
@@ -197,7 +214,7 @@ package breakdance.ui.commons {
             }
 
             mcCharacterContainer2.addEventListener (Event.ENTER_FRAME, enterFrameListener);
-
+			
             changeListener (null);
 
             hideScreenShootMode ();
@@ -340,19 +357,38 @@ package breakdance.ui.commons {
 		
 		
         private function mouseDownMusicListener (event:MouseEvent):void {
-            var playerMusicPopUp:PlayerMusicPopUp = PopUpManager.instance.playerMusicPopUp;
-			playerMusicPopUp.show()
-            //if (playerMusicPopUp.isShowed) {
-              //  playerMusicPopUp.hide ();
-            //}
+			Tracer.log('mouseDownMusicListener')
+            var playerMusicPopUp:PlayerMusicPopUp = PopUpManager.instance.playerMusicPopUp;			
+            if (playerMusicPopUp.isShowed) {
+                playerMusicPopUp.hide ();
+            }
+			else {
+				// screenContainer.closeAll (); ???
+				playerMusicPopUp.show()
+			}	
         }
-
-        private function rollOverusicListener (event:MouseEvent):void {
-            var message:String = textsManager.getText ("hitPlayerMusic");
+		
+		private function musicManagerMuteListener (event:Event):void {
+			Tracer.log('musicManagerMuteListener   '+SoundManager.instance.enableMusic+'       '+SoundManager.instance.pauseMusic)
+			if(mcMusicContainer){
+				if (SoundManager.instance.enableMusic && SoundManager.instance.pauseMusic == false)			
+					mcMusicContainer.gotoAndPlay(PLAY_FRAME)	
+				else	
+					mcMusicContainer.gotoAndStop(STOP_FRAME)	
+			}		
+		}	
+		
+        private function rollOverMusicListener (event:MouseEvent):void {
+			var playerMusicPopUp:PlayerMusicPopUp = PopUpManager.instance.playerMusicPopUp;
+			var message:String = playerMusicPopUp.getNameTrack();			
+			if (message == '')			
+				message = textsManager.getText ("hitPlayerMusic");		
+			Tracer.log('rollOverMusicListener '+message);
             BreakdanceApp.instance.showTooltipMessage (message);
         }
 
         private function rollOutMusicListener (event:MouseEvent):void {
+			Tracer.log('rollOutMusicListener ');
             BreakdanceApp.instance.hideTooltip ();
         }
 
@@ -363,13 +399,13 @@ package breakdance.ui.commons {
             startReposition ();
         }
 
-        private function rollOverListener (event:MouseEvent):void {
+        private function rollOverListener (event:MouseEvent):void {			
             var message:String = textsManager.getText ("ttMoveCharacter");
-            BreakdanceApp.instance.showTooltipMessage (message);
+	         BreakdanceApp.instance.showTooltipMessage (message);
         }
 
         private function rollOutListener (event:MouseEvent):void {
-            BreakdanceApp.instance.hideTooltip ();
+			BreakdanceApp.instance.hideTooltip ();
         }
 
         private function mouseUpListener (event:MouseEvent):void {

@@ -11,6 +11,7 @@ package breakdance.ui {
     import breakdance.template.Template;
     import breakdance.ui.commons.CharacterView;
     import breakdance.ui.popups.PopUpManager;
+	import flash.geom.Point;
 
     import com.adobe.images.PNGEncoder;
     import com.greensock.loading.SWFLoader;
@@ -83,6 +84,11 @@ package breakdance.ui {
             _template.y = SCREEN_OFFSET_Y;
             _backgroundsContainer.addChild (_template);
         }
+		
+		public function get coordHitMusic():Point {			
+			return characterView.musicContainerCoord;
+		}		
+		
 
 /////////////////////////////////////////////
 //PRIVATE:

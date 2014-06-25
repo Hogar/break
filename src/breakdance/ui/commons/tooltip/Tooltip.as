@@ -9,6 +9,7 @@ package breakdance.ui.commons.tooltip {
 
     import breakdance.GlobalConstants;
     import breakdance.template.Template;
+	import flash.utils.Timer;
 
     import com.greensock.TweenLite;
     import com.hogargames.display.GraphicStorage;
@@ -18,6 +19,8 @@ package breakdance.ui.commons.tooltip {
     import flash.events.Event;
     import flash.geom.Point;
     import flash.text.TextField;
+	import flash.events.TimerEvent;
+	import com.hogargames.debug.Tracer;
 
     public class Tooltip extends GraphicStorage {
 
@@ -43,7 +46,7 @@ package breakdance.ui.commons.tooltip {
 
         private var positionX:Number;
         private var positionY:Number;
-
+		
         private var orientation:String = TooltipOrientation.BOTTOM;
 
         private static const SHOW_TWEEN_TIME:Number = .3;
@@ -62,7 +65,7 @@ package breakdance.ui.commons.tooltip {
 //PUBLIC:
 /////////////////////////////////////////////
 
-        public function showTextAndPosition (tooltipData:TooltipData, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM):void {
+        public function showTextAndPosition (tooltipData:TooltipData, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM, timeHide:Number =0):void {
             this.orientation = orientation;
             if (orientation == TooltipOrientation.BOTTOM) {
                 mcBottom.visible = false;
@@ -75,12 +78,21 @@ package breakdance.ui.commons.tooltip {
             setPosition (positionPoint);
             setText (tooltipData);
             if (tooltipData && !tooltipData.isEmpty) {
-                show (noAnimation);
-            }
+                show (noAnimation);				
+				if (timeHide > 0) {
+					Tracer.log('timeHide  ' + timeHide +  '  ' + mc)
+					TweenLite.killTweensOf (mc);
+					TweenLite.to (mc, timeHide, {onComplete:onCompleteHide});
+				}
+			}
             else {
                 hide ();
             }
         }
+		public function onCompleteHide():void {
+			Tracer.log('onCompleteHide  ' + onCompleteHide)
+			hide();
+		}
 
         public function setText (data:TooltipData):void {
             var tfWidth:int = 0;
@@ -196,8 +208,9 @@ package breakdance.ui.commons.tooltip {
                 TweenLite.to (mc, SHOW_TWEEN_TIME, {alpha:1, delay:SHOW_DELAY, onComplete:setShowed});
             }
         }
-
+		
         public function hide ():void {
+			Tracer.log('tooltip    hide   '+positionY)
             TweenLite.killTweensOf (mc);
             TweenLite.to (mc, SHOW_TWEEN_TIME, {alpha:0, onComplete:setHide});
             setPosition (null);
@@ -294,6 +307,6 @@ package breakdance.ui.commons.tooltip {
                 position ();
             }
         }
-
+		
     }
 }

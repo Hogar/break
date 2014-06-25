@@ -12,6 +12,7 @@ package breakdance.core.ui.overlay {
         // top layer is layer with biggest priority
         static public const DEV_UI_PRIORITY:uint = 200;
         static public const TOOLTIP_LAYER_PRIORITY:uint = 160;
+		static public const TOOLTIP_LAYER_PRIORITY_MUSICK:uint = 167;
         static public const SETTINGS_LAYER_PRIORITY:uint = 157;
         static public const ERROR_LAYER_PRIORITY:uint = 156;
         static public const TRANSACTION_LAYER_PRIORITY:uint = 155;

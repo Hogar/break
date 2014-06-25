@@ -43,6 +43,7 @@ package breakdance.ui.screens.homeScreen {
     import flash.events.MouseEvent;
     import flash.geom.Point;
     import flash.text.TextField;
+	import breakdance.ui.commons.tooltip.TooltipOrientation;
 
     public class HomeScreen extends Screen {
 
@@ -82,7 +83,8 @@ package breakdance.ui.screens.homeScreen {
             super (Template.createSymbol (Template.HOME_SCREEN));
             var containerForScreens:Sprite = new Sprite ();
             addChild (containerForScreens);
-            screenContainer = new ScreensContainer (containerForScreens);
+            screenContainer = new ScreensContainer (containerForScreens);		
+			
         }
 
 /////////////////////////////////////////////
