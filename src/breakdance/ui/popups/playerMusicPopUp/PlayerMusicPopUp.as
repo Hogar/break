@@ -49,6 +49,15 @@ package breakdance.ui.popups.playerMusicPopUp
 		private var btnPlay			: Button;		
 		private var btnStop			: Button;		
 		
+        private var btnMusicOn		:Button;
+        private var btnMusicOff		:Button;
+        private var btnSoundOn		:Button;
+        private var btnSoundOff		:Button;
+        private var btnRu			:Button;
+        private var btnEn			:Button;
+
+        private var languageButtons:Vector.<Button>;
+		
 		private var btnShuffle		: ButtonPressed;
 		private var tfNameTrack		: TextField;
 		private var tfSource		: TextField;
@@ -60,8 +69,6 @@ package breakdance.ui.popups.playerMusicPopUp
 		private var _lastSourceTrack: int;				
 		private var _pause 			: Boolean;
 		private var _timer			: Timer;		
-		private var btnRu			:Button;
-        private var btnEn			:Button;
 		
 		public function PlayerMusicPopUp() 
 		{
@@ -118,6 +125,12 @@ package breakdance.ui.popups.playerMusicPopUp
 			if (_currentSource ==  PlayerMusicPopUp.RADIO){
 				tfNameSource.text =  textsManager.getText ("playerMusicSourceRadio");								
 			}	
+			if (TextsManager.instance.currentLanguage == TextsManager.RU) {
+                selectLanguageButton (btnRu);
+            }
+            else {
+                selectLanguageButton (btnEn);
+            }
         }
 
         override public function destroy ():void {
@@ -145,13 +158,20 @@ package breakdance.ui.popups.playerMusicPopUp
 				btnShuffle.removeEventListener (MouseEvent.ROLL_OUT, rollOutListener);
 				btnShuffle.destroy ();
 			}	
+
+            SoundManager.instance.removeEventListener (SoundManagerEvent.CHANGE_SOUND_CONTROLLER, changeSoundControllerListener);
+            SoundManager.instance.removeEventListener (SoundManagerEvent.CHANGE_MUSIC_CONTROLLER, changeMusicControllerListener);
+			
 			
             super.destroy ();
         }
 		
 		public function getNameTrack():String {
-			var namesong:String = _listGroup[_currentSource].hitSong; 
-			return namesong;			
+			if (_currentSource !=  PlayerMusicPopUp.RADIO && _listGroup[_currentSource]){
+				var namesong:String = _listGroup[_currentSource].hitSong; 
+				return namesong;			
+			}	
+			return '';			
 		}
 
 
@@ -172,6 +192,11 @@ package breakdance.ui.popups.playerMusicPopUp
 			tfSource = getElement ("txtSource");
 		    btnRu = new Button (getElement("btnRu"));
 		    btnEn = new Button (getElement("btnEn"));			
+			btnMusicOn = new Button (getElement("btnMusicOn"));
+            btnMusicOff = new Button (getElement("btnMusicOff"));
+            btnSoundOn = new Button (getElement("btnSoundOn"));
+            btnSoundOff = new Button (getElement("btnSoundOff"));
+			
 		    btnShuffle = new ButtonPressed(getElement ("btnShuffle"));
             initButton(btnPrevSource);
             initButton(btnPrevTrack);
@@ -179,14 +204,29 @@ package breakdance.ui.popups.playerMusicPopUp
             initButton(btnNextTrack);
             initButton(btnPlay);
 			initButton(btnStop);			
+			
+			initButton(btnMusicOn);
+			initButton(btnMusicOff);
+			initButton(btnSoundOn);
+			initButton(btnSoundOff);
 			initButton(btnRu);
 			initButton(btnEn);
 			
+			
 			btnShuffle.addEventListener (MouseEvent.CLICK, clickListener);
 			btnShuffle.addEventListener (MouseEvent.ROLL_OVER, rollOverListener);
-            btnShuffle.addEventListener (MouseEvent.ROLL_OUT, rollOutListener);
+            btnShuffle.addEventListener (MouseEvent.ROLL_OUT, rollOutListener);			            			
 			
-			SoundManager.instance.addEventListener(SoundManagerEvent.CHANGE_MUSIC_CONTROLLER, musicManagerMuteListener);          	
+            languageButtons = new Vector.<Button> ();
+            languageButtons.push (btnRu);
+            languageButtons.push (btnEn);
+			
+            SoundManager.instance.addEventListener(SoundManagerEvent.CHANGE_SOUND_CONTROLLER, changeSoundControllerListener);
+            SoundManager.instance.addEventListener(SoundManagerEvent.CHANGE_MUSIC_CONTROLLER, changeMusicControllerListener);
+
+            changeSoundControllerListener (null);
+            changeMusicControllerListener (null);
+
         }
 
 		
@@ -218,7 +258,21 @@ package breakdance.ui.popups.playerMusicPopUp
 		private function musicManagerMuteListener(ev:Event):void {
 			pauseSound(SoundManager.instance.enableMusic);				
 		}
+		        
+        private function changeMusicControllerListener (event:SoundManagerEvent):void {
+            var enable:Boolean = SoundManager.instance.enableMusic;
+            btnMusicOn.visible = !enable;
+            btnMusicOff.visible = enable;
+			
+			pauseSound(!enable);	
+        }
 		
+        private function changeSoundControllerListener (event:SoundManagerEvent):void {
+            var enable:Boolean = SoundManager.instance.enableSound;
+            btnSoundOn.visible = !enable;
+            btnSoundOff.visible = enable;
+        }
+
 				
         private function initButton (btn:Button):void {
             if (btn) {
@@ -237,12 +291,20 @@ package breakdance.ui.popups.playerMusicPopUp
             }
         }
 
+	    private function selectLanguageButton (button:Button):void {
+            for (var i:int = 0; i < languageButtons.length; i++) {
+                var currentLanguageButton:Button = languageButtons [i];
+                currentLanguageButton.visible = !(currentLanguageButton == button);
+            }
+        }
+
+
 /////////////////////////////////////////////
 //LISTENERS:
 /////////////////////////////////////////////
 
+ 
         private function clickListener (event:MouseEvent):void {
-			Tracer.log('clickListener    _currentSource  = ' + _currentSource+'      '+event.currentTarget.name);
 		    switch (event.currentTarget) {
                 case btnPrevSource:
 					changeSource(-1);
@@ -285,21 +347,50 @@ package breakdance.ui.popups.playerMusicPopUp
 					Tracer.log('  btnShuffle    ')
 					_listGroup[_currentSource].shuffle = btnShuffle.pressed;
 					checkBtn();
-					break;
-                case (btnRu):
+					break;					
+				case (btnRu):
                     textsManager.setCurrentLanguage (TextsManager.RU, true);
                     break;
                 case (btnEn):
                     textsManager.setCurrentLanguage (TextsManager.EN, true);
-                    break;					
+                    break;
+                case btnSoundOn:
+                    SoundManager.instance.enableSound = true;
+                    break;
+                case btnSoundOff:
+                    SoundManager.instance.enableSound = false;
+                    break;
+                case btnMusicOn:
+                    SoundManager.instance.enableMusic = true;
+                    break;
+                case btnMusicOff:
+                    SoundManager.instance.enableMusic = false;
+                    break;	
             }
 			
         }
 		
-		
-        private function rollOverListener (event:MouseEvent):void {
+		  private function rollOverListener(event:MouseEvent):void {
             var tooltipText:String;
             switch (event.currentTarget) {
+                case btnSoundOn:
+                    tooltipText = textsManager.getText ("ttSoundOn");
+                    break;
+                case btnSoundOff:
+                    tooltipText = textsManager.getText ("ttSoundOff");
+                    break;
+                case btnMusicOn:
+                    tooltipText = textsManager.getText ("ttMusicOn");
+                    break;
+                case btnMusicOff:
+                    tooltipText = textsManager.getText ("ttMusicOff");
+                    break;
+                case btnRu:
+                    tooltipText = textsManager.getText ("ttRussian");
+                    break;
+                case btnEn:
+                    tooltipText = textsManager.getText ("ttEnglish");
+                    break;
                 case btnPrevSource:
                     tooltipText = textsManager.getText ("pmBtnHitPrevSource");
                     break;
@@ -321,17 +412,10 @@ package breakdance.ui.popups.playerMusicPopUp
                 case btnShuffle:
                     tooltipText = textsManager.getText ("pmBtnHitShuffle");
                     break;       				
-                case btnRu:
-                    tooltipText = textsManager.getText ("ttRussian");
-                    break;
-                case btnEn:
-                    tooltipText = textsManager.getText ("ttEnglish");
-                    break;
             }
             if (tooltipText) {
                 var positionPoint:Point = getTooltipPositionByButton (Sprite (event.currentTarget));
-				Tracer.log('positionPoint   '+positionPoint+'           tooltipText  '+tooltipText)
-                BreakdanceApp.instance.showTooltipMessage (tooltipText, positionPoint);
+				BreakdanceApp.instance.showTooltipMessage (tooltipText, positionPoint);
             }
         }
 		
@@ -393,7 +477,6 @@ package breakdance.ui.popups.playerMusicPopUp
 		private function onChangeNameTrack(ev:ChangePlayerDataEvent):void {			
 			tfNameTrack.text = _listGroup[_currentSource].captionSong;				       
 			var positionPoint:Point = BreakdanceApp.instance.background.coordHitMusic;
-			Tracer.log('PMPU : onChangeNameTrack  :  hitSong   ' + _listGroup[_currentSource].hitSong+'      '+positionPoint )
 			BreakdanceApp.instance.showTooltipMessageSong (_listGroup[_currentSource].hitSong, positionPoint, false, TooltipOrientation.TOP, 5);			
 		}
 		

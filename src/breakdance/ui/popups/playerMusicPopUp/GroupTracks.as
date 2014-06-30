@@ -28,6 +28,7 @@ package breakdance.ui.popups.playerMusicPopUp
 		private var _currentTrack	: int;
 		private var _currentName	: String;				
 		private var _currentAutor	: String;				
+		private var _lastTrack		: int;
 		private var _maxCountTrack 	: int;
 		private var isPlay 			: Boolean; // флаг нужно ли проигрывать музыку после завершения обновления группы
 		private var _pause		 	: Boolean;
@@ -36,6 +37,7 @@ package breakdance.ui.popups.playerMusicPopUp
 		private var timerTrack		: Timer;
 		private var _startTimer		: Number;
 		private var _residualTime	: Number;
+		
 		
 		public function GroupTracks(id: int, nameGroup:String) 
 		{			
@@ -109,14 +111,28 @@ package breakdance.ui.popups.playerMusicPopUp
 		}		
 
 		public function nextSongPlay():void {
-			if (_shuffle) _currentTrack = int(Math.random() * _listTrack.length+10);
+			if (_shuffle) {
+				if (_listTrack.length < _maxCountTrack) 
+					_currentTrack = int(Math.random() * _listTrack.length + 10);
+				else 	
+					_currentTrack = int(Math.random() * _listTrack.length);
+				if (_lastTrack == _currentTrack + 1)	
+					_lastTrack = _currentTrack - 1;
+			}
 			_currentTrack++;	
 			_clear = true;
 			playSong();
 		}
 
 		public function previousSongPlay():void {
-			if (_shuffle) _currentTrack = int(Math.random() * _listTrack.length+10);
+			if (_shuffle) {
+				if (_listTrack.length < _maxCountTrack) 
+					_currentTrack = int(Math.random() * _listTrack.length + 10);
+				else 	
+					_currentTrack = int(Math.random() * _listTrack.length);
+				if (_lastTrack == _currentTrack - 1)	
+					_lastTrack = _currentTrack + 1;
+			}
 			_currentTrack--;	
 			_clear = true;
 			playSong();
@@ -182,11 +198,9 @@ package breakdance.ui.popups.playerMusicPopUp
 			//если пауза - показать текущую композицию
 			if (_pause) {				
 				SoundManager.instance.pauseSong(true);		
-				Tracer.log('Stop   timerTrack.delay   ' +timerTrack.delay +'    _residualTime = '+_residualTime+'    _startTimer = '+_startTimer);
 				_residualTime -= (ServerTime.instance.time -_startTimer);
 				_startTimer = ServerTime.instance.time;
 				timerTrack.stop();
-				Tracer.log('Stop 222  timerTrack.delay   ' +timerTrack.delay +'    _residualTime = '+_residualTime+'    _startTimer = '+_startTimer);
 			}
 			else  {
 				if (_clear) {												
@@ -196,7 +210,8 @@ package breakdance.ui.popups.playerMusicPopUp
 					timerTrack.reset();
 					timerTrack.start();
 					_startTimer = ServerTime.instance.time;
-					_residualTime = _listTrack[_currentTrack].duration * 1000; 
+					_residualTime = _listTrack[_currentTrack].duration * 1000;
+					_lastTrack = _currentTrack;
 					dispatchEvent (new ChangePlayerDataEvent (ChangePlayerDataEvent.CHANGE_NAME_SONG));
 					Tracer.log('Restart   timerTrack.delay   ' +timerTrack.delay +'   _startTimer = '+_startTimer);
 					_clear = false;  // т.е. проигрывается текущая песня					

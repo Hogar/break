@@ -30,7 +30,7 @@ package breakdance {
     import breakdance.ui.commons.tooltip.TooltipData;
     import breakdance.ui.commons.tooltip.TooltipOrientation;
     import breakdance.ui.panels.bottomPanel.BottomPanel;
-    import breakdance.ui.panels.settingsPanel.SettingsPanel;
+    //import breakdance.ui.panels.settingsPanel.SettingsPanel;
     import breakdance.ui.panels.topPanel.TopPanel;
     import breakdance.ui.popups.PopUpManager;
     import breakdance.ui.popups.pvpLogPanel.PvpLogPanelPopUp;
@@ -66,7 +66,7 @@ package breakdance {
         public var background:AppBackground;
         public var topPanel:TopPanel;
         public var friendsPanel:BottomPanel;
-        public var settingsPanel:SettingsPanel;
+        //public var settingsPanel:SettingsPanel;
 
         private var homeScreen:HomeScreen;
         private var battleScreen:BattleScreen;
@@ -171,10 +171,8 @@ package breakdance {
             tooltip.hide ();
         }
 
-	    public function showTooltipMessageSong (message:String, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM, timeHide:Number = 0):void {
-			trace(tooltip+'   '+tooltipSong)
-            tooltipSong.showTextAndPosition (message, positionPoint, noAnimation, orientation, timeHide);
-			
+	    public function showTooltipMessageSong (message:String, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM, timeHide:Number = 0):void {			
+            tooltipSong.showTextAndPosition (message, positionPoint, noAnimation, orientation, timeHide);			
         }
 
         public function hideTooltipSong ():void {
@@ -201,8 +199,8 @@ package breakdance {
             friendsPanel = new BottomPanel ();
             OverlayManager.instance.addOverlay (friendsPanel, OverlayManager.UI_PRIORITY);
 
-            settingsPanel = new SettingsPanel ();
-            OverlayManager.instance.addOverlay (settingsPanel, OverlayManager.SETTINGS_LAYER_PRIORITY);
+            //settingsPanel = new SettingsPanel ();
+            //OverlayManager.instance.addOverlay (settingsPanel, OverlayManager.SETTINGS_LAYER_PRIORITY);
 
             background = new AppBackground ();
             addChild (background);

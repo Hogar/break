@@ -65,7 +65,7 @@ package breakdance.ui.commons.tooltip {
 //PUBLIC:
 /////////////////////////////////////////////
 
-        public function showTextAndPosition (tooltipData:TooltipData, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM, timeHide:Number =0):void {
+        public function showTextAndPosition (tooltipData:TooltipData, positionPoint:Point = null, noAnimation:Boolean = false, orientation:String = TooltipOrientation.BOTTOM):void {
             this.orientation = orientation;
             if (orientation == TooltipOrientation.BOTTOM) {
                 mcBottom.visible = false;
@@ -79,18 +79,12 @@ package breakdance.ui.commons.tooltip {
             setText (tooltipData);
             if (tooltipData && !tooltipData.isEmpty) {
                 show (noAnimation);				
-				if (timeHide > 0) {
-					Tracer.log('timeHide  ' + timeHide +  '  ' + mc)
-					TweenLite.killTweensOf (mc);
-					TweenLite.to (mc, timeHide, {onComplete:onCompleteHide});
-				}
 			}
             else {
                 hide ();
             }
         }
 		public function onCompleteHide():void {
-			Tracer.log('onCompleteHide  ' + onCompleteHide)
 			hide();
 		}
 

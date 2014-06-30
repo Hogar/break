@@ -291,3 +291,7 @@ experienced			В теме(кол-во угаданных «связок дня»
 [09:03:03 PM]   btnPlay    1
 [09:03:03 PM]  pauseSound   false
 [09:03:03 PM] playSong   0
+
+TypeError: Error #1009: Cannot access a property or method of a null object reference.
+	at breakdance.ui.popups.playerMusicPopUp::PlayerMusicPopUp/getNameTrack()[D:\FLASH_Соц_2014\Igor\Break_DanceGit\break\src\breakdance\ui\popups\playerMusicPopUp\PlayerMusicPopUp.as:153]
+	at breakdance.ui.commons::CharacterView/rollOverMusicListener()[D:\FLASH_Соц_2014\Igor\Break_DanceGit\break\src\breakdance\ui\commons\CharacterView.as:383]

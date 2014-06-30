@@ -18,6 +18,7 @@ package breakdance.ui.panels.bottomPanel {
     import breakdance.ui.panels.bottomPanel.settingBlockButton.NewsButton;
     import breakdance.ui.panels.bottomPanel.settingBlockButton.ScreenshotButton;
     import breakdance.ui.panels.settingsPanel.SettingsPanel;
+	import breakdance.ui.popups.playerMusicPopUp.PlayerMusicPopUp;
     import breakdance.ui.popups.PopUpManager;
     import breakdance.ui.screenManager.ScreenManager;
     import breakdance.ui.screenManager.events.ScreenManagerEvent;
@@ -397,6 +398,14 @@ package breakdance.ui.panels.bottomPanel {
                     popUpManager.savePhotoPopUp.show ();
                     break;
                 case btnSettings:
+					var playerMusicPopUp:PlayerMusicPopUp = PopUpManager.instance.playerMusicPopUp;			
+					if (playerMusicPopUp.isShowed) {
+						playerMusicPopUp.hide ();
+					}
+					else {						
+						playerMusicPopUp.show()
+					}
+			/*
                     var settingsPanel:SettingsPanel = BreakdanceApp.instance.settingsPanel;
                     if (settingsPanel.isShowed) {
                         settingsPanel.hide ();
@@ -404,6 +413,7 @@ package breakdance.ui.panels.bottomPanel {
                     else {
                         settingsPanel.show ();
                     }
+					*/
                     break;
                 case btnEditCharacter:
                     popUpManager.editCharacterPopUp.show ();
